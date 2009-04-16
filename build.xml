@@ -1,0 +1,198 @@
+<!--
+Copyright 2009 The Open University
+http://www.open.ac.uk/lts/projects/audioapplets/
+
+This file is part of the "Open University audio applets" project.
+
+The "Open University audio applets" project is free software: you can
+redistribute it and/or modify it under the terms of the GNU General Public
+License as published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version.
+
+The "Open University audio applets" project is distributed in the hope that it
+will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with the "Open University audio applets" project.
+If not, see <http://www.gnu.org/licenses/>.
+-->
+<project name="audiorecording" basedir="." default="jar">
+ 
+  <description>
+    Builds the audio recording applets.
+  </description>
+	
+	<!-- Specify the desired build folder -->
+	<property name="build" value="${java.io.tmpdir}/audiorecording-build"/>
+    
+  <!-- Target for jars file excluding .jar and date/timestamp -->
+  <property name="jartarget1" value="${user.home}/Desktop/audiorecorder"/>
+  <property name="jartarget2" value="${user.home}/Desktop/embeddedrecorder"/>
+	
+	<!-- Version number -->
+	<property name="buildversion" value="1.0"/>
+    
+  <!-- Location of keystore -->
+  <property name="keystore" location="misc/keystore"/>
+  <property name="keystorepass" value="fillthisin"/>
+  <property name="keyalias" value="testkey"/>
+  
+<!-- 
+About generating keys
+=====================
+
+1) You can generate keys with Ant, but I decided not to as it won't do 
+   everything anyway.
+   
+2) You will need keytool on the path or else to type the path all the time.
+
+
+Generating a key pair
+=====================
+
+(Lasts 10,000 days)
+
+C:\Program Files\Java\jre1.6.0_05\lib\security>
+..\..\..\jdk1.6.0_03\bin\keytool -genkey -keystore keystore 
+  -storepass appleapple -keyalg rsa -alias testkey -validity 10000
+What is your first and last name?
+  [Unknown]:  Test Developer
+What is the name of your organizational unit?
+  [Unknown]:  LTS
+What is the name of your organization?
+  [Unknown]:  The Open University
+What is the name of your City or Locality?
+  [Unknown]:  Milton Keynes
+What is the name of your State or Province?
+  [Unknown]:  Buckinghamshire
+What is the two-letter country code for this unit?
+  [Unknown]:  UK
+Is CN=Test Developer, OU=LTS, O=The Open University, L=Milton Keynes, ST=Bucking
+hamshire, C=UK correct?
+  [no]:  yes
+
+Enter key password for <testkey>
+        (RETURN if same as keystore password):
+
+The file keystore can be placed in the misc folder of 
+this project, allowing this ant script to use it for signing.
+
+I think that's all you need to do, however...
+
+
+Exporting as a certificate and importing into trusted keys
+==========================================================
+
+I don't think you actually need to do this in order to sign or run the applet.
+The self-signed cert will work without being trusted, and signing should use 
+the existing keystore file. However, just in case, here is the information.
+
+1) Export the cert from the 'kestore' file
+
+C:\Program Files\Java\jre1.6.0_05\lib\security>
+..\..\..\jdk1.6.0_03\bin\keytool -export -keystore keystore 
+  -storepass appleapple -alias testkey -file testcert.crt
+Certificate stored in file <testcert.crt>
+
+2) Import it into the trusted certificates
+
+Finally you see why I'm in the JRE directory...
+
+C:\Program Files\Java\jre1.6.0_05\lib\security>
+..\..\..\jdk1.6.0_03\bin\keytool
+-import -keystore cacerts -storepass changeit -file testcert.crt
+Owner: CN=Test Developer, OU=LTS, O=The Open University, L=Milton Keynes, ST=Buc
+kinghamshire, C=UK
+Issuer: CN=Test Developer, OU=LTS, O=The Open University, L=Milton Keynes, ST=Bu
+ckinghamshire, C=UK
+Serial number: 47f4ec30
+Valid from: Thu Apr 03 15:39:44 BST 2008 until: Mon Aug 20 15:39:44 BST 2035
+Certificate fingerprints:
+         MD5:  93:7C:46:8E:51:1B:65:82:67:9D:92:A4:48:B6:B2:C4
+         SHA1: EA:5A:CD:01:D9:E3:D8:22:C3:4A:8E:5A:5B:EC:A1:6B:EB:A0:C1:6A
+         Signature algorithm name: SHA1withRSA
+         Version: 3
+Trust this certificate? [no]:  yes
+Certificate was added to keystore
+
+
+
+I got some of this information from:
+
+http://forum.java.sun.com/thread.jspa?threadID=174214
+
+ -->  
+	
+	<!-- Create fresh build folder -->
+	<target name="init">
+		<tstamp/>
+		<tstamp>
+			<format property="buildstamp" pattern="yyyy-MM-dd HH:mm:ss"/>
+		</tstamp>
+		<delete dir="${build}" quiet="true"/>
+		<mkdir dir="${build}"/>
+	</target>
+  
+  <!-- Compile Java source -->
+  <target name="compile" depends="init">
+		
+		<mkdir dir="${build}/compiled"/>
+		
+    <!-- Compile everything -->    
+    <javac srcdir="src" destdir="${build}/compiled" debug="on" source="1.5" target="1.5"/>
+  </target>
+	
+	<!-- Copy data files from source to build folder -->
+	<target name="copydata">
+	
+  	<!-- Copy actual data -->
+		<copy todir="${build}/compiled">
+			<fileset dir="src">
+				<exclude name="**/*.java"/>
+				<exclude name="**/package.html"/>
+			</fileset>
+		</copy>
+
+		<!-- Copy additional files from misc -->
+		<copy todir="${build}/compiled/uk/ac/open/audio">
+			<fileset dir="misc">
+			  <include name="*.jnilib"/>
+			</fileset>
+		</copy>
+		
+		<!-- Write version file -->
+		<echo file="${build}/compiled/uk/ac/open/audio/version.txt" append="false" >${buildversion}|${buildstamp}</echo>
+		
+  </target>		
+	
+	<!-- Create jar files and sign them -->
+	<target name="jar" depends="compile,copydata">
+		
+		<mkdir dir="${build}/jar"/>
+		
+    <jar jarfile="${build}/jar/audiorecording.unsigned.jar" basedir="${build}/compiled">
+			<include name="uk/ac/open/audio/*"/>
+			<include name="uk/ac/open/audio/adpcm/**"/>
+			<include name="uk/ac/open/audiorecorder/**"/>
+    	<exclude name="uk/ac/open/audiorecorder/AudioRecorderApp.java"/>
+    </jar>
+    
+    <signjar jar="${build}/jar/audiorecording.unsigned.jar" signedjar="${jartarget1}${DSTAMP}${TSTAMP}.jar" keystore="${keystore}" storepass="${keystorepass}" alias="${keyalias}"/>    
+
+    <jar jarfile="${build}/jar/embeddedrecorder.unsigned.jar" basedir="${build}/compiled">
+			<include name="uk/ac/open/audio/*"/>
+			<include name="uk/ac/open/audio/adpcm/**"/>
+			<include name="uk/ac/open/audio/mp3/**"/>
+			<include name="uk/ac/open/audio/streaming/**"/>
+			<include name="javazoom/**"/>
+			<include name="uk/ac/open/embeddedrecorder/**"/>
+    	<exclude name="uk/ac/open/embeddedrecorder/EmbeddedRecorderApp.java"/>
+    </jar>
+    
+    <signjar jar="${build}/jar/embeddedrecorder.unsigned.jar" signedjar="${jartarget2}${DSTAMP}${TSTAMP}.jar" keystore="${keystore}" storepass="${keystorepass}" alias="${keyalias}"/>    
+
+	</target>   
+	
+</project>
