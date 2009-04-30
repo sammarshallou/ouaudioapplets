@@ -35,7 +35,7 @@ public class EmbeddedRecorderApp extends JFrame
 	public EmbeddedRecorderApp() throws Exception
 	{
 		super("Embedded recording test");
-		getContentPane().add(new EmbeddedRecorder(
+		EmbeddedRecorder recorder = new EmbeddedRecorder(
 				new URL("http://sm449.vledev.open.ac.uk/moodle/ultest.php"),
 				new URL("http://lyceum.open.ac.uk/temp/30s.mp3"),
 				new URL("http://lyceum.open.ac.uk/temp/12s.mp3"),
@@ -46,7 +46,8 @@ public class EmbeddedRecorderApp extends JFrame
 				"Listen","Record","Play back","Model","Stop","Cancel",
 				new Color(0,51,102),new Color(184,219,255),new Color(219,237,255),
 				new Color(204,153,0),new Color(240,225,179),new Color(247,240,217),
-				new Color(219,237,255), false));
+				new Color(219,237,255), false);
+		getContentPane().add(recorder);
 		pack();
 		setVisible(true);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);

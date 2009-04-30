@@ -20,8 +20,10 @@ If not, see <http://www.gnu.org/licenses/>.
 */
 package uk.ac.open.embeddedrecorder;
 
+import java.applet.Applet;
 import java.awt.Color;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.net.*;
 import java.util.regex.*;
 
@@ -43,6 +45,8 @@ public class EmbeddedRecorderApplet extends JApplet
 		"#([0-9A-F]{2})([0-9A-F]{2})([0-9A-F]{2})");
 
 	private EmbeddedRecorder recorder;
+
+	private String focusHackId;
 
 	/** @return Recorder for this applet */
 	EmbeddedRecorder getRecorder()
@@ -131,6 +135,16 @@ public class EmbeddedRecorderApplet extends JApplet
 				crossPlatformAudioStr+". Expecting y or n.");
 		}
 
+		// Get the focus hack setting. If enabled, the system does custom
+		// processing to call JavaScript function in the host page, at the point
+		// where it ought to release keyboard focus
+		focusHackId = getParameter("focushackid");
+		if(!focusHackId.matches("[A-Za-z0-9_]+"))
+		{
+			throw new IllegalArgumentException("Invalid focushackid: " +
+				focusHackId + ". Expecting A-Z, a-z, 0-9, _ only.");
+		}
+
 		// Init recorder panel
 		try
 		{
@@ -158,6 +172,78 @@ public class EmbeddedRecorderApplet extends JApplet
 		// Let the recorder know the context so it can get other applets
 		// (dynamically) later on
 		recorder.setAppletContext(getAppletContext());
+
+		// Set up focus
+		if(focusHackId != null)
+		{
+			// Listen for focus falling off the ends
+			recorder.addFocusHack(
+				new Runnable()
+				{
+					public void run()
+					{
+						ditchFocus(false);
+					}
+				},
+				new Runnable()
+				{
+					public void run()
+					{
+						ditchFocus(true);
+					}
+				});
+
+			// Inform browser that applet has loaded
+			SwingUtilities.invokeLater(new Runnable()
+			{
+				public void run()
+				{
+					appletLoaded();
+				}
+			});
+		}
+	}
+
+	public void initFocus(boolean last)
+	{
+		recorder.focusSomething(last);
+	}
+
+	private void ditchFocus(boolean forward)
+	{
+		// Tell JavaScript to ditch focus for this applet id
+		evalJS("appletDitchFocus('"+focusHackId+"', "+forward+");");
+	}
+
+	private void evalJS(String js)
+	{
+		try
+		{
+			// Decided to use reflection to make this easier to compile - otherwise
+			// it needs plugin.jar from a JRE. Also this should make it safer at
+			// runtime.
+
+			// JSObject.getWindow(this).eval(js);
+			Class<?> c=Class.forName("netscape.javascript.JSObject");
+			Method m = c.getMethod("getWindow", new Class<?>[] {Applet.class});
+			Object win = m.invoke(null, this);
+			Method m2 = c.getMethod("eval", new Class<?>[] {String.class});
+			m2.invoke(win, js);
+		}
+		catch (ClassNotFoundException ex)
+		{
+			System.err.println("JSObject support not found, ignoring (keyboard focus may not work)");
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+		}
+	}
+
+	private void appletLoaded()
+	{
+		// Tell JavaScript this applet is ready
+		evalJS("appletLoaded('"+focusHackId+"');");
 	}
 
 	@Override
