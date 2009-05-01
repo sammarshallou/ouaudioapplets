@@ -79,6 +79,22 @@ public abstract class PlaybackDevice
 			return 3 * ((audio.getChannels() * (int)audio.getSampleRate() *
 				audio.getSampleSizeInBits()) / 16);
 		}
+
+		/** @return Number of bytes per frame */
+		public int getBytesPerFrame()
+		{
+			return audio.getFrameSize();
+		}
+
+		/**
+		 * @param frames Number of frames
+		 * @return Millisecond estimate
+		 */
+		public long convertFramesToMs(int frames)
+		{
+			int framesPerSecond=(int)audio.getFrameRate();
+			return (frames*1000) / framesPerSecond;
+		}
 	}
 
 	/**

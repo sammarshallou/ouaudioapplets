@@ -424,7 +424,6 @@ public class StreamPlayerUI extends JPanel implements
 					playbackError(e);
 				}
 			}
-
 		}
 	}
 

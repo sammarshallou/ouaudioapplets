@@ -40,6 +40,12 @@ public class StreamPlayer
 	private final static int MINSAMPLESBEFORESTART=4410; // 100ms of audio
 
 	/**
+	 * Minimum size of audio data blocks (blocks read from decoder are combined
+	 * until they reach this size)
+	 */
+	private final static int MINDECODEDBLOCKSIZE=4608;
+
+	/**
 	 * If non-zero, limits downloading to this many bytes per second.
 	 */
 	private static int ARTIFICIALDELAY_BPS=0;
@@ -86,6 +92,8 @@ public class StreamPlayer
 		READYTOPLAY,
 		/** Completely downloaded */
 		FULLYLOADED,
+		/** Fully loaded, but audio buffer is empty */
+		BUFFEREMPTY,
 		/** Closed (no more playback possible) */
 	  CLOSED
 	}
@@ -629,6 +637,10 @@ public class StreamPlayer
 	 */
 	public synchronized boolean hasNextAudio()
 	{
+		if(nextAudio.isEmpty() && currentState == State.FULLYLOADED && !playFinished)
+		{
+			setState(State.BUFFEREMPTY);
+		}
 		return playFinished || !nextAudio.isEmpty();
 	}
 
@@ -695,6 +707,10 @@ public class StreamPlayer
 					{
 						while(nextAudio.size()>=AUDIOBLOCKBUFFER && !shouldClose())
 						{
+							if(currentState == StreamPlayer.State.BUFFEREMPTY)
+							{
+								setState(StreamPlayer.State.FULLYLOADED);
+							}
 							StreamPlayer.this.wait();
 						}
 						if(shouldClose())
@@ -704,12 +720,34 @@ public class StreamPlayer
 						}
 					}
 					// Get some new audio
-					byte[] audio;
-					do
+					byte[] audio = null;
+					while(true)
 					{
 						try
 						{
-							audio=decoder.decode();
+							byte[] newAudio = decoder.decode();
+
+							if(newAudio == null)
+							{
+								break;
+							}
+							// Sometimes decoders return 0-length data blocks
+							if(newAudio.length == 0)
+							{
+								continue;
+							}
+							if(audio == null)
+							{
+								audio = newAudio;
+							}
+							else
+							{
+								byte[] combinedAudio = new byte[audio.length + newAudio.length];
+								System.arraycopy(audio, 0, combinedAudio, 0, audio.length);
+								System.arraycopy(newAudio, 0, combinedAudio, audio.length, newAudio.length);
+								audio = combinedAudio;
+							}
+							if(audio.length >= MINDECODEDBLOCKSIZE) break;
 						}
 						catch(Throwable t)
 						{
@@ -718,10 +756,8 @@ public class StreamPlayer
 							blockInput.close();
 							return;
 						}
-						// Sometimes we get a 0-sample result from this which misleads our
-						// stats - so in that case, try again
 					}
-					while(audio!=null && audio.length==0);
+
 					int totalBytesDecoded=blockInput.getTotalPos();
 					double percentagePlayed;
 					if(length==UNKNOWN)
@@ -755,6 +791,10 @@ public class StreamPlayer
 						StreamPlayer.this.notifyAll();
 						if(audio==null)
 						{
+							if(currentState == StreamPlayer.State.BUFFEREMPTY)
+							{
+								setState(StreamPlayer.State.FULLYLOADED);
+							}
 							playFinished=true;
 							blockInput.close();
 							return;

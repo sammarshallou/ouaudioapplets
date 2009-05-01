@@ -128,14 +128,14 @@ class JavaSoundPlaybackDevice extends PlaybackDevice
 		@Override
 		public void run()
 		{
-			long sentTime=0;
-			long startedAt=0;
+			boolean started = false;
+			long sentFrames=0;
 			try
 			{
 				while(true)
 				{
 					// If somebody has manually stopped playback, bail
-					if(startedAt!=0 && !playing)
+					if(started && !playing)
 					{
 						return;
 					}
@@ -160,8 +160,7 @@ class JavaSoundPlaybackDevice extends PlaybackDevice
 							}
 						}
 
-						// Note time of pause. Offset the start time to make it work
-						startedAt+=(System.currentTimeMillis()-pauseStart);
+						// Pause over, restart
 						playbackLine.start();
 					}
 
@@ -174,13 +173,14 @@ class JavaSoundPlaybackDevice extends PlaybackDevice
 					if(block!=null)
 					{
 						add(block,block.length);
-						sentTime+=blockTime;
+						sentFrames+=block.length/getFormat().getBytesPerFrame();
 					}
 
 					// If we've sent enough blocks, start playback
-					if(startedAt==0 && (sentTime>blockTime+PLAYLATENCYMS || block==null))
+					if(!started && (getFormat().convertFramesToMs((int)sentFrames) >
+						blockTime+PLAYLATENCYMS || block==null))
 					{
-						startedAt=System.currentTimeMillis();
+						started = true;
 						JavaSoundPlaybackDevice.this.start();
 						synchronized(playerStartSynch)
 						{
@@ -200,14 +200,17 @@ class JavaSoundPlaybackDevice extends PlaybackDevice
 					// Wait (don't generate more blocks yet) if we've sent enough data
 					// that after the current block runs out we'd still have PLAYLATENCYMS
 					// left.
-					long playTime=System.currentTimeMillis()-startedAt;
-					if(sentTime-playTime > blockTime+PLAYLATENCYMS)
+					long spareTime = getFormat().convertFramesToMs(
+						(int)(sentFrames - playbackLine.getLongFramePosition()));
+					long delay = spareTime - (blockTime+PLAYLATENCYMS);
+
+					if(delay>10) // Extra limit here is a minimum 'wait' time
 					{
 						try
 						{
 							synchronized(JavaSoundPlaybackDevice.this)
 							{
-								JavaSoundPlaybackDevice.this.wait(sentTime-playTime-(blockTime+PLAYLATENCYMS));
+								JavaSoundPlaybackDevice.this.wait(delay);
 							}
 						}
 						catch (InterruptedException e)
