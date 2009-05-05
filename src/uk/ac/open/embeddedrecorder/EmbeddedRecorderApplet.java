@@ -48,10 +48,55 @@ public class EmbeddedRecorderApplet extends JApplet
 
 	private String focusHackId;
 
+	private final static Pattern REGEX_VERSION = Pattern.compile(
+			"([0-9]+)\\.([0-9]+)\\.([0-9]+)(?:_([0-9]+))?(-.*)?");
+
+	private static boolean oldJava;
+
+
 	/** @return Recorder for this applet */
 	EmbeddedRecorder getRecorder()
 	{
 		return recorder;
+	}
+
+	/** Static code detects old Java version */
+	static
+	{
+		String version = System.getProperty("java.version");
+		Matcher m = REGEX_VERSION.matcher(version);
+
+		// If it doesn't match we assume it's newer
+		if(m.matches())
+		{
+			int
+				major = Integer.parseInt(m.group(1)),
+				minor = Integer.parseInt(m.group(2)),
+				sub = Integer.parseInt(m.group(3)),
+				patch = 0;
+			if(m.group(4) != null)
+			{
+				patch = Integer.parseInt(m.group(4));
+			}
+
+			// If they ever release Java '2' it'll be newer..
+			if(major==1)
+			{
+				if(minor < 6)
+				{
+					oldJava = true;
+				}
+				else if(minor == 6 && sub == 0)
+				{
+					oldJava = patch < 13;
+				}
+			}
+		}
+		if(oldJava)
+		{
+			System.err.println("Old Java version < 1.6.0_13 in use; Tab key not " +
+				"fully supported");
+		}
 	}
 
 	@Override
@@ -173,8 +218,9 @@ public class EmbeddedRecorderApplet extends JApplet
 		// (dynamically) later on
 		recorder.setAppletContext(getAppletContext());
 
-		// Set up focus
-		if(focusHackId != null)
+		// Set up focus - if Java version is recent enough that it doesn't crash!
+		// (See OU bug 7734)
+		if(focusHackId != null && !oldJava)
 		{
 			// Listen for focus falling off the ends
 			recorder.addFocusHack(
