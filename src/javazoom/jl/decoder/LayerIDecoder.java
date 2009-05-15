@@ -126,6 +126,10 @@ class LayerIDecoder implements FrameDecoder
 		boolean write_ready = false;
 		int mode = header.mode();
 		int i;
+// sam
+		try
+		{
+//sam end		
 		do
   		{
   		  for (i = 0; i < num_subbands; ++i)
@@ -140,7 +144,13 @@ class LayerIDecoder implements FrameDecoder
            		filter2.calculate_pcm_samples(buffer);
   		  } while (!write_ready);
   		} while (!read_ready);
-		
+// sam
+	}
+	catch(ArrayIndexOutOfBoundsException e)
+	{
+		System.err.println("JLayer (MP3 decoder): Glitch, skipping frame");
+	}
+//sam end		
 	}
 
 	/**
