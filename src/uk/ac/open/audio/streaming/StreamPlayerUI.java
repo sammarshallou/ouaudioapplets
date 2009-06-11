@@ -127,6 +127,10 @@ public class StreamPlayerUI extends JPanel implements
 			button.setFont(
 					button.getFont().deriveFont(9.0f));
 		}
+		else if(!RecordingDevice.isMac())
+		{
+			button.setFont(button.getFont().deriveFont(11.0f));
+		}
 
 		Dimension d=button.getPreferredSize();
 		int w=d.width,h=d.height;
