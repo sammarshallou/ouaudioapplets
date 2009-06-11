@@ -24,6 +24,7 @@ import java.applet.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.RoundRectangle2D;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.*;
 
@@ -439,8 +440,30 @@ public class EmbeddedRecorder extends JPanel
 	 */
 	void stop()
 	{
-		// Stops any audio
-		players.starting(null);
+		Runnable r = new Runnable()
+		{
+			public void run()
+			{
+				// Stops any audio
+				players.starting(null);
+			}
+		};
+
+		if(SwingUtilities.isEventDispatchThread())
+		{
+			r.run();
+		}
+		else
+		{
+			try
+			{
+				SwingUtilities.invokeAndWait(r);
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+			}
+		}
 	}
 
 	/**
