@@ -32,8 +32,6 @@ public class MainPanel extends JPanel
 {
 	private static final long serialVersionUID=1L;
 
-	private final static Color OUTLINE=new Color(219,237,255);
-
 	private CardLayout cards=new CardLayout();
 
 	private boolean gotError;
