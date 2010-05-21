@@ -41,7 +41,7 @@ public class IntroPage extends PageBase
 			"tool helps you record an audio file using your computer.\n\nYou will " +
 			"begin by testing that your microphone is working with this tool. " +
 			"After that, you record your audio. You can then play it back to check " +
-			"it, before saving it to your desktop as a .wav file."),
+			"it, before finally saving it to your desktop as a compressed .wav file."),
 			BorderLayout.NORTH);
 	}
 
