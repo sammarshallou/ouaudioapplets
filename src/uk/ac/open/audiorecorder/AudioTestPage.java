@@ -21,8 +21,10 @@ If not, see <http://www.gnu.org/licenses/>.
 package uk.ac.open.audiorecorder;
 
 import java.awt.BorderLayout;
+import java.util.Arrays;
 
 import javax.swing.*;
+import javax.swing.event.*;
 
 import uk.ac.open.audio.*;
 
@@ -37,6 +39,8 @@ public class AudioTestPage extends PageBase implements RecordingDevice.Handler
 	private PlaybackDevice playback;
 
 	private int count;
+	
+	private boolean muteOutput;
 
 	/**
 	 * @param owner Owning panel
@@ -49,7 +53,7 @@ public class AudioTestPage extends PageBase implements RecordingDevice.Handler
 		JPanel text=new JPanel(new BorderLayout(0,4));
 		text.setOpaque(false);
 		getMain().add(text,BorderLayout.CENTER);
-
+		
 		text.add(new WrappedText("Please talk into your microphone and watch " +
 			"the level display. If the display usually goes into the yellow area " +
 			"between the two dotted lines while you are speaking, then your " +
@@ -59,15 +63,38 @@ public class AudioTestPage extends PageBase implements RecordingDevice.Handler
 		text.add(text2,BorderLayout.CENTER);
 		text2.add(new WrappedText(
 			"If the level frequently shows as red, your microphone level " +
-			"is too loud - reduce the level or move the microphone further away. (The " +
-			"top red bar indicates actual distortion.) If it " +
+			"is too loud and audio will be distorted - reduce the level or move the " +
+			"microphone further away. On the other hand, if it " +
 			"never reaches the yellow area, the level may be too low."),
 			BorderLayout.NORTH);
-		text2.add(new WrappedText("While you talk, your voice will be echoed back " +
+		
+		JPanel text3 = new JPanel(new BorderLayout(0, 4));
+		text3.setOpaque(false);
+		text2.add(text3, BorderLayout.CENTER);		
+		text3.add(new WrappedText("While you talk, your voice will be echoed back " +
 				"through your headphones or speakers after a short delay. This can help " +
 				"confirm that audio is working correctly. If these echoes build up into " +
-				"feedback, please turn down your speakers."),
-				BorderLayout.CENTER);
+				"feedback, please click the 'Mute output' box."),
+				BorderLayout.NORTH);
+		
+		JPanel text4 = new JPanel(new BorderLayout());
+		text4.setOpaque(false);
+		text3.add(text4, BorderLayout.CENTER);
+		final JCheckBox mute = new JCheckBox("Mute output");
+		mute.setOpaque(false);
+		text4.add(mute, BorderLayout.NORTH);
+		mute.addChangeListener(new ChangeListener()
+		{
+			@Override
+			public void stateChanged(ChangeEvent e)
+			{
+				synchronized(this)
+				{
+					muteOutput = mute.isSelected();
+					System.err.println("Muted: "+ muteOutput);
+				}
+			}
+		});
 
 		lm=new LevelMeter();
 		getMain().add(lm,BorderLayout.EAST);
@@ -89,9 +116,21 @@ public class AudioTestPage extends PageBase implements RecordingDevice.Handler
     		lm.setLevel(level);
     	}
     });
+    
+    boolean mute;
+    synchronized(this)
+    {
+    	mute = muteOutput;
+    }
 
     try
 		{
+    	// If muted, zero data
+    	if(mute)
+    	{
+    		Arrays.fill(data, (byte)0);
+    	}
+
       // Add data to playback
 			playback.add(data, bytes);
 
