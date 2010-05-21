@@ -81,6 +81,8 @@ public class AudioTestPage extends PageBase implements RecordingDevice.Handler
 		text4.setOpaque(false);
 		text3.add(text4, BorderLayout.CENTER);
 		final JCheckBox mute = new JCheckBox("Mute output");
+		mute.setForeground(FontType.NORMAL.getColor());
+		mute.setFont(FontType.NORMAL.getFont());
 		mute.setOpaque(false);
 		text4.add(mute, BorderLayout.NORTH);
 		mute.addChangeListener(new ChangeListener()
