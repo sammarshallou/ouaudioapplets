@@ -91,7 +91,6 @@ public class AudioTestPage extends PageBase implements RecordingDevice.Handler
 				synchronized(this)
 				{
 					muteOutput = mute.isSelected();
-					System.err.println("Muted: "+ muteOutput);
 				}
 			}
 		});
