@@ -40,13 +40,13 @@ public class RecordPage extends PageBase implements RecordingDevice.Handler
 	public RecordPage(MainPanel owner)
 	{
 		super(owner,3,"Recording");
-		initButtons("Start recording","Restart from scratch","Finished",FOCUS_LEFT1);
+		initButtons("Start recording", "Restart from scratch", "Finish", FOCUS_LEFT1);
 		enableButtons(true, false, false);
 
 		getMain().add(new WrappedText("Click 'Start recording' to begin recording, " +
 			"then speak into the microphone. The display below will show you the time " +
 			"taken and a representation of the recorded sound. When you are done, click " +
-			"'Pause recording' and then 'Finished'."),BorderLayout.NORTH);
+			"'Pause recording' and then 'Finish'."),BorderLayout.NORTH);
 
 		JPanel lower=new JPanel(new BorderLayout(0,8));
 		lower.setOpaque(false);
