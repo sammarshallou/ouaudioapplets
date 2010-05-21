@@ -38,7 +38,7 @@ public class EmbeddedRecorderApp extends JFrame
 		EmbeddedRecorder recorder = new EmbeddedRecorder(
 				new URL("http://sm449.vledev.open.ac.uk/moodle/ultest.php"),
 				new URL("http://lyceum.open.ac.uk/temp/30s.mp3"),
-				new URL("http://lyceum.open.ac.uk/temp/12s.mp3"),
+				null,//new URL("http://lyceum.open.ac.uk/temp/12s.mp3"),
 				new URL("http://lyceum.open.ac.uk/temp/20s.mp3"),
 				null,//new URL("http://lyceum.open.ac.uk/temp/adpcm.wav"),
 				EmbeddedRecorder.Order.LISTENFIRST,
