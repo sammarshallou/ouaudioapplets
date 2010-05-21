@@ -9,5 +9,6 @@ public class FLabel extends JLabel
 		super(text);
 		setFont(type.getFont());
 		setForeground(type.getColor());
+		setOpaque(false);
 	}
 }

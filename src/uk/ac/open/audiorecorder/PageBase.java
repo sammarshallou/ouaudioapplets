@@ -47,7 +47,7 @@ public abstract class PageBase extends JPanel
 		setLayout(new BorderLayout(0,8));
 
 		JPanel upper=new JPanel(new BorderLayout(8,0));
-		upper.setBackground(Color.WHITE);
+		upper.setOpaque(false);
 		add(upper,BorderLayout.NORTH);
 
 		JLabel headingLabel = new FLabel(FontType.HEADING, heading);
@@ -65,10 +65,10 @@ public abstract class PageBase extends JPanel
 		buttons.setBorder(BorderFactory.createEmptyBorder(8,0,0,0));
 
 		main=new JPanel(new BorderLayout(8,8));
-		main.setBackground(Color.WHITE);
+		main.setOpaque(false);
 		add(main,BorderLayout.CENTER);
 
-		setBackground(Color.WHITE);
+		setOpaque(false);
 	}
 
 	/** Called when page is entered. */

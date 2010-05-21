@@ -68,10 +68,8 @@ public class MainPanel extends JPanel
 	  addPage(PAGE_SAVE,new SavePage(this));
 	  addPage(PAGE_FINISHED,new FinishedPage(this));
 	  setPage(PAGE_INTRO);
-	  setBorder(BorderFactory.createCompoundBorder(
-	  		BorderFactory.createMatteBorder(1, 1, 1, 1, OUTLINE),
-	  		BorderFactory.createMatteBorder(7, 7, 7, 7, Color.white)
-	  		));
+	  setBorder(BorderFactory.createEmptyBorder(9, 11, 11, 11));
+	  setOpaque(false);
 	}
 
 	/**
@@ -120,5 +118,52 @@ public class MainPanel extends JPanel
 	ADPCMRecording getRecording()
 	{
 		return recording;
+	}
+
+	private final static Color BORDER_OUTER = new Color(204, 204, 204);
+	private final static Color GRADIENT_START = new Color(204, 238, 237);
+	private final static int GRADIENT_SIZE = 34;
+	private final static int[] EDGES = { 3, 2, 1};
+
+	@Override
+	protected void paintComponent(Graphics g)
+	{
+		// Do background (white, rounded edges)
+		g.setColor(Color.WHITE);
+		int edge = EDGES.length;
+		g.fillRect(edge, edge, getWidth() - 2*edge, getHeight() - 2*edge);
+		for(int i=0; i<EDGES.length; i++)
+		{
+			edge = EDGES[i];
+			g.fillRect(i, edge, 1, getHeight() - edge*2);
+			g.fillRect(getWidth()-i-1, edge, 1, getHeight() - edge*2);
+			g.fillRect(edge, i, getWidth()-edge*2, 1);
+			g.fillRect(edge, getHeight()-i-1, getWidth()-edge*2, 1);
+		}
+	}
+
+	@Override
+	protected void paintBorder(Graphics g)
+	{
+		super.paintBorder(g);
+
+		int red = GRADIENT_START.getRed(), green=GRADIENT_START.getGreen(),
+			blue = GRADIENT_START.getBlue();
+		for(int i=0; i<GRADIENT_SIZE; i++)
+		{
+			int inverse = GRADIENT_SIZE - i;
+			g.setColor(new Color(
+				(red * inverse + 255 * i) / GRADIENT_SIZE,
+				(green * inverse + 255 * i) / GRADIENT_SIZE,
+				(blue * inverse + 255 * i) / GRADIENT_SIZE
+				));
+			int edge = i<EDGES.length ? EDGES[i] : 0;
+			g.fillRect(edge, i+1, getWidth() - 2*edge, 1);
+		}
+
+		g.setColor(BORDER_OUTER);
+		((Graphics2D)g).setRenderingHint(
+			RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+		g.drawRoundRect(0, 0, getWidth()-1, getHeight()-1, 10, 10);
 	}
 }
