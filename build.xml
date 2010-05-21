@@ -175,6 +175,7 @@ http://forum.java.sun.com/thread.jspa?threadID=174214
     <jar jarfile="${build}/jar/audiorecording.unsigned.jar" basedir="${build}/compiled">
 			<include name="uk/ac/open/audio/*"/>
 			<include name="uk/ac/open/audio/adpcm/**"/>
+			<include name="uk/ac/open/audio/streaming/**"/>
 			<include name="uk/ac/open/audiorecorder/**"/>
     	<exclude name="uk/ac/open/audiorecorder/AudioRecorderApp.java"/>
     </jar>
