@@ -22,7 +22,7 @@ package uk.ac.open.audiorecorder;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.io.File;
+import java.io.*;
 
 import javax.swing.*;
 import javax.swing.event.*;
@@ -60,24 +60,36 @@ public class SavePage extends PageBase
 		{
 			return horribleWarning;
 		}
+		
+		private static boolean doneTestSave, testSaveOk;
+		
+		private boolean testSave()
+		{
+			if(!doneTestSave)
+			{
+				// Test save
+				try
+				{
+					File test = new File(
+						targetFolder, "audiorecorder." + Math.random() + ".tmp");
+					new FileOutputStream(test).close();
+					test.delete();
+					testSaveOk = true;
+				}
+				catch(IOException e)
+				{
+					testSaveOk = false;
+				}
+				doneTestSave = true;
+			}
+			return testSaveOk;
+		}
+		
 		/** Constructs the information based on current platform. */
 		LocationInfo()
 		{
 			String platform=System.getProperty("os.name");
-			if(platform.indexOf("Vista")!=-1)
-			{
-				targetFolder=new File(System.getProperty("java.io.tmpdir"));
-				explanation="into a temporary folder ("+targetFolder+")";
-				horribleWarning="Please retrieve the file immediately from the " +
-					"temporary folder as it may later be deleted by the system. You " +
-					"should move it somewhere else, such as your desktop. To " +
-					"access the temporary folder, click the Start button (Windows logo), " +
-					"then type in the following: "+targetFolder+"\n\n"+
-					"We apologise for the inconvenience; because you are using Windows " +
-					"Vista it is not currently possible to save the file somewhere more " +
-					"sensible.";
-			}
-			else if(platform.indexOf("Mac")!=-1 ||
+			if(platform.indexOf("Mac")!=-1 ||
 				  platform.indexOf("Windows")!=-1)
 			{
 				targetFolder=new File(System.getProperty("user.home")+"/Desktop");
@@ -89,6 +101,20 @@ public class SavePage extends PageBase
 				targetFolder=new File(System.getProperty("user.home"));
 				explanation="into your home directory ("+targetFolder+")";
 				horribleWarning=null;
+			}
+
+			if(!testSave())
+			{
+				targetFolder=new File(System.getProperty("java.io.tmpdir"));
+				explanation="into a temporary folder ("+targetFolder+")";
+				horribleWarning="Please retrieve the file immediately from the " +
+					"temporary folder as it may later be deleted by the system. You " +
+					"should move it somewhere else, such as your desktop. To " +
+					"access the temporary folder, click the Start button (Windows logo), " +
+					"then type in the following: "+targetFolder+"\n\n"+
+					"We apologise for the inconvenience; with your current operating " +
+					"system and Java versions and permissions, it is not possible to save " +
+					"the file somewhere more sensible.";
 			}
 		}
 	}
