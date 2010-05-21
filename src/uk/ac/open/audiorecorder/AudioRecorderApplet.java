@@ -32,6 +32,13 @@ public class AudioRecorderApplet extends JApplet
 	/** Constructs. */
 	public AudioRecorderApplet()
 	{
+		getContentPane().add(new MainPanel());
+	}
+
+	@Override
+	public void init()
+	{
+		super.init();
 		try
 		{
 			RecordingDevice.macInstall(getCodeBase(),AudioRecorderApplet.class);
@@ -41,7 +48,5 @@ public class AudioRecorderApplet extends JApplet
 			System.err.println("Error installing OS X extension");
 			e.printStackTrace();
 		}
-
-		getContentPane().add(new MainPanel());
 	}
 }
