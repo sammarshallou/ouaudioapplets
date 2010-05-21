@@ -46,15 +46,17 @@ public abstract class PageBase extends JPanel
 		this.owner=owner;
 		setLayout(new BorderLayout(0,8));
 
-		JPanel upper=new JPanel(new BorderLayout(0,8));
+		JPanel upper=new JPanel(new BorderLayout(8,0));
 		upper.setBackground(Color.WHITE);
 		add(upper,BorderLayout.NORTH);
 
-		upper.add(new CirclesPanel(progress),BorderLayout.NORTH);
+		JLabel headingLabel = new FLabel(FontType.HEADING, heading);
+		upper.add(headingLabel,BorderLayout.WEST);
 
-		JLabel headingLabel=new JLabel(heading);
-		headingLabel.setFont(headingLabel.getFont().deriveFont(Font.BOLD));
-		upper.add(headingLabel,BorderLayout.SOUTH);
+		JLabel headingInfo = new FLabel(FontType.SMALL, "Step " + progress + " of 6");
+		headingInfo.setVerticalAlignment(JLabel.BOTTOM);
+		headingInfo.setBorder(BorderFactory.createEmptyBorder(0, 0, 1, 0));
+		upper.add(headingInfo,BorderLayout.EAST);
 
 		buttons=new JPanel(new BorderLayout(8,0));
 		buttons.setOpaque(false);
@@ -179,7 +181,7 @@ public abstract class PageBase extends JPanel
 
 		if(right!=null)
 		{
-			rightButton=new JButton(right);
+			rightButton = new FButton(right);
 			rightButton.addActionListener(new ActionListener()
 			{
 				public void actionPerformed(ActionEvent arg0)
@@ -196,7 +198,7 @@ public abstract class PageBase extends JPanel
 			buttons.add(left,BorderLayout.WEST);
 			if(left1!=null)
 			{
-				left1Button=new JButton(left1);
+				left1Button = new FButton(left1);
 				left1Button.addActionListener(new ActionListener()
 				{
 					public void actionPerformed(ActionEvent arg0)
@@ -208,7 +210,7 @@ public abstract class PageBase extends JPanel
 			}
 			if(left2!=null)
 			{
-				left2Button=new JButton(left2);
+				left2Button = new FButton(left2);
 				left2Button.addActionListener(new ActionListener()
 				{
 					public void actionPerformed(ActionEvent arg0)

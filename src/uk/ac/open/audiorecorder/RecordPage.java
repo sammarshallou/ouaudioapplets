@@ -132,8 +132,8 @@ public class RecordPage extends PageBase implements RecordingDevice.Handler
 	@Override
 	protected void buttonLeft2()
 	{
-		JLabel message=new JLabel("Are you sure you want to delete the recording and start again?");
-		message.setFont(message.getFont().deriveFont(Font.PLAIN));
+		JLabel message = new FLabel(FontType.NORMAL, 
+			"Are you sure you want to delete the recording and start again?");
 		int result=JOptionPane.showOptionDialog(this,
 			message,
 			"Confirm restart",

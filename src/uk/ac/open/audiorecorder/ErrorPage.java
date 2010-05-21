@@ -47,8 +47,7 @@ class ErrorPage extends JPanel
 		upper.setOpaque(false);
 		add(upper,BorderLayout.NORTH);
 
-		JLabel headingLabel=new JLabel("An error has occurred");
-		headingLabel.setFont(headingLabel.getFont().deriveFont(Font.BOLD));
+		JLabel headingLabel = new FLabel(FontType.HEADING, "An error has occurred");
 		upper.add(headingLabel,BorderLayout.NORTH);
 		upper.add(new WrappedText("A system error has occurred. If you report this " +
 			"error, please include the entire text of the error in your email (using " +
@@ -77,7 +76,7 @@ class ErrorPage extends JPanel
 		buttons.setOpaque(false);
 		add(buttons,BorderLayout.SOUTH);
 
-		JButton copy=new JButton("Copy error to clipboard");
+		JButton copy = new FButton("Copy error to clipboard");
 		copy.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent arg0)

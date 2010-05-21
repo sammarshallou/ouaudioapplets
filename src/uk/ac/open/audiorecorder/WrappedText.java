@@ -20,10 +20,6 @@ If not, see <http://www.gnu.org/licenses/>.
 */
 package uk.ac.open.audiorecorder;
 
-import java.awt.Font;
-
-import javax.swing.JLabel;
-
 /**
  * Component that displays wrapped text.
  */
@@ -37,7 +33,8 @@ public class WrappedText extends javax.swing.JTextArea
 	public WrappedText(String text)
 	{
 		super(text);
-		setFont((new JLabel()).getFont().deriveFont(Font.PLAIN));
+		setFont(FontType.NORMAL.getFont());
+		setForeground(FontType.NORMAL.getColor());
 		setLineWrap(true);
 		setWrapStyleWord(true);
 		setEditable(false);

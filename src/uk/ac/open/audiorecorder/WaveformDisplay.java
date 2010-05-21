@@ -66,8 +66,8 @@ public class WaveformDisplay extends JComponent
 		g2.fillRect(0,0,width+1,height+1);
 
 		// Draw time
-		Font f=(new JLabel()).getFont().deriveFont(Font.PLAIN);
-		g2.setColor(Color.BLACK);
+		g2.setColor(FontType.NORMAL.getColor());
+		Font f = FontType.NORMAL.getFont();
 		g2.setFont(f);
 		FontMetrics fm=g2.getFontMetrics(f);
 		int baselinePos=height-fm.getDescent();

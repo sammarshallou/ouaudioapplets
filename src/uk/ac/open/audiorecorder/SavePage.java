@@ -124,14 +124,14 @@ public class SavePage extends PageBase
 		anotherBloodyPanel.add(savePanel,BorderLayout.WEST);
 
 		saveName=new JTextField(20);
-		JLabel dotWav=new JLabel(".wav");
+		JLabel dotWav = new FLabel(FontType.NORMAL, ".wav");
 		dotWav.setFont(dotWav.getFont().deriveFont(Font.PLAIN));
 		JPanel boxPanel=new JPanel(new BorderLayout(2,0));
 		boxPanel.setOpaque(false);
 		boxPanel.add(saveName,BorderLayout.WEST);
 		boxPanel.add(dotWav,BorderLayout.EAST);
 
-		saveButton=new JButton("Save");
+		saveButton = new FButton("Save");
 		saveButton.setEnabled(false);
 		savePanel.add(boxPanel,BorderLayout.WEST);
 		savePanel.add(saveButton,BorderLayout.EAST);
