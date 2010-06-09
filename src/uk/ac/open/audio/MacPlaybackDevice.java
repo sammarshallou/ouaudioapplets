@@ -254,12 +254,20 @@ public class MacPlaybackDevice extends PlaybackDevice
 						while(paused)
 						{
 							MacPlaybackDevice.this.wait();
+							if(started && !playing)
+							{
+								return;
+							}
 						}
 
 						// Wait until we need more audio (less than latency)
 						while(MacAudio.playbackGetUnplayedSize(device) > latencyBytes)
 						{
 							MacPlaybackDevice.this.wait(10);
+							if(started && !playing)
+							{
+								return;
+							}
 						}
 					}
 
