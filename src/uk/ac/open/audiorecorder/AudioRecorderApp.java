@@ -20,7 +20,11 @@ If not, see <http://www.gnu.org/licenses/>.
 */
 package uk.ac.open.audiorecorder;
 
+import java.io.IOException;
+
 import javax.swing.JFrame;
+
+import uk.ac.open.audio.RecordingDevice;
 
 /**
  * Application version of audio recorder.
@@ -42,6 +46,15 @@ public class AudioRecorderApp extends JFrame
 	 */
 	public static void main(String[] args)
 	{
+		try
+		{
+			RecordingDevice.macInstall(null, null);
+		}
+		catch (IOException e)
+		{
+			System.err.println("Error installing OS X extension");
+			e.printStackTrace();
+		}
 		new AudioRecorderApp();
 	}
 }
