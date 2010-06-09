@@ -144,7 +144,6 @@ class JavaSoundPlaybackDevice extends PlaybackDevice
 					{
 						// Get time pause begins
 						playbackLine.stop();
-						long pauseStart=System.currentTimeMillis();
 						while(paused)
 						{
 							// If somebody has paused playback, pause this thread too

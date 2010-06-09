@@ -24,7 +24,6 @@ import java.applet.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.RoundRectangle2D;
-import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.*;
 
@@ -378,10 +377,13 @@ public class EmbeddedRecorder extends JPanel
 		userPlayer.setEnabled(enable);
 	}
 
-	/** Focus a component */
+	/**
+	 * Focus a component.
+	 * @param last True if we want to focus the last component, false to get
+	 *   the first one
+	 */
 	void focusSomething(boolean last)
 	{
-		// Will this focus something? Who knows
 		if(last)
 		{
 			after.transferFocusBackward();

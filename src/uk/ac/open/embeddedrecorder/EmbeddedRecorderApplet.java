@@ -250,6 +250,10 @@ public class EmbeddedRecorderApplet extends JApplet
 		}
 	}
 
+	/**
+	 * Initialises focus for the applet.
+	 * @param last True to focus the last thing, false for the first
+	 */
 	public void initFocus(boolean last)
 	{
 		recorder.focusSomething(last);

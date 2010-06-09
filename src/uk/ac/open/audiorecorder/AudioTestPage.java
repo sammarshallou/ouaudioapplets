@@ -87,7 +87,6 @@ public class AudioTestPage extends PageBase implements RecordingDevice.Handler
 		text4.add(mute, BorderLayout.NORTH);
 		mute.addChangeListener(new ChangeListener()
 		{
-			@Override
 			public void stateChanged(ChangeEvent e)
 			{
 				synchronized(this)
