@@ -162,6 +162,8 @@ public class RecordPage extends PageBase implements RecordingDevice.Handler
 	{
 		super.enter();
 		getLeft1Button().setText("Start recording");
+		getRightButton().setEnabled(false);
+		getLeft2Button().setEnabled(false);
 		try
 		{
 			recording=RecordingDevice.construct(false);

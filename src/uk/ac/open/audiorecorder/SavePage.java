@@ -217,6 +217,7 @@ public class SavePage extends PageBase
 	protected void enter()
 	{
 		super.enter();
+		saveName.setText("");
 		saveName.requestFocus();
 		getRootPane().setDefaultButton(saveButton);
 	}
