@@ -20,15 +20,16 @@ If not, see <http://www.gnu.org/licenses/>.
 */
 package uk.ac.open.audiorecorder;
 
-import java.awt.*;
+import java.awt.BorderLayout;
 import java.awt.event.*;
 
 import javax.swing.*;
 
 import uk.ac.open.audio.adpcm.ADPCMRecording;
+import uk.ac.open.tabapplet.TabAppletFocuser;
 
 /** Base class for applet pages. */
-public abstract class PageBase extends JPanel
+public abstract class PageBase extends JPanel implements TabAppletFocuser
 {
 	private static final long serialVersionUID=1L;
 
@@ -238,5 +239,23 @@ public abstract class PageBase extends JPanel
 				getOwner().showError(t);
 			}
 		});
+	}
+
+	@Override
+	public void initFocus(boolean last)
+	{
+		// Default focus is first button
+		JButton[] buttons = { left1Button, left2Button, rightButton };
+		int start = last ? buttons.length-1 : 0;
+		int increment = last ? -1 : 1;
+		int end = last ? -1 : buttons.length;
+		for(int i=start; i!=end; i+=increment)
+		{
+			if(buttons[i]!=null && buttons[i].isEnabled())
+			{
+				buttons[i].requestFocus();
+				break;
+			}
+		}
 	}
 }

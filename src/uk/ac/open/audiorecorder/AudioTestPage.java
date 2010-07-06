@@ -42,6 +42,8 @@ public class AudioTestPage extends PageBase implements RecordingDevice.Handler
 	
 	private boolean muteOutput;
 
+	private JCheckBox mute;
+
 	/**
 	 * @param owner Owning panel
 	 */
@@ -80,7 +82,7 @@ public class AudioTestPage extends PageBase implements RecordingDevice.Handler
 		JPanel text4 = new JPanel(new BorderLayout());
 		text4.setOpaque(false);
 		text3.add(text4, BorderLayout.CENTER);
-		final JCheckBox mute = new JCheckBox("Mute output");
+		mute = new JCheckBox("Mute output");
 		mute.setForeground(FontType.NORMAL.getColor());
 		mute.setFont(FontType.NORMAL.getFont());
 		mute.setOpaque(false);
@@ -171,4 +173,16 @@ public class AudioTestPage extends PageBase implements RecordingDevice.Handler
 		playback.close();
 	}
 
+	@Override
+	public void initFocus(boolean last)
+	{
+		if(last)
+		{
+			super.initFocus(last);
+		}
+		else
+		{
+			mute.requestFocus();
+		}
+	}
 }

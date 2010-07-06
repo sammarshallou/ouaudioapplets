@@ -221,4 +221,17 @@ public class SavePage extends PageBase
 		saveName.requestFocus();
 		getRootPane().setDefaultButton(saveButton);
 	}
+
+	@Override
+	public void initFocus(boolean last)
+	{
+		if(last && saveButton.isEnabled())
+		{
+			saveButton.requestFocus();
+		}
+		else
+		{
+			saveName.requestFocus();
+		}
+	}
 }

@@ -51,10 +51,6 @@ public class EmbeddedRecorder extends JPanel
 
 	private String group;
 
-	private JPanel innerPanel;
-	private JButton before, after;
-	private Runnable beforeAction, afterAction;
-
 	/** Order of activity */
 	public enum Order
 	{
@@ -95,7 +91,7 @@ public class EmbeddedRecorder extends JPanel
 			Color dark, Color light, Color faint, Color altDark, Color altLight,
 			Color altFaint, Color corners, boolean crossPlatformAudio)
 	{
-		super(null);
+		super(new FlowLayout(FlowLayout.LEFT, 0, 0));
 
 		this.corners=corners;
 		this.order=order;
@@ -104,11 +100,9 @@ public class EmbeddedRecorder extends JPanel
 
 		int playerWidth=0;
 
-		innerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
-		innerPanel.setOpaque(false);
-		innerPanel.setBorder(BorderFactory.createEmptyBorder(
+		setOpaque(false);
+		setBorder(BorderFactory.createEmptyBorder(
 				OUTERMARGIN, OUTERMARGIN, OUTERMARGIN, OUTERMARGIN));
-		add(innerPanel, BorderLayout.CENTER);
 
 		players=new StreamPlayerGroup();
 		players.addListener(this);
@@ -123,7 +117,7 @@ public class EmbeddedRecorder extends JPanel
 			playerWidth += listenPlayer.getPreferredSize().width;
 			if(order == Order.LISTENFIRST)
 			{
-				innerPanel.add(listenPlayer);
+				add(listenPlayer);
 			}
 		}
 
@@ -164,12 +158,12 @@ public class EmbeddedRecorder extends JPanel
 				s=new Spacer();
 			}
 
-			innerPanel.add(s);
+			add(s);
 		}
-		innerPanel.add(recordPlayer);
+		add(recordPlayer);
 		playerWidth += recordPlayer.getPreferredSize().width;
-		innerPanel.add(new Spacer());
-		innerPanel.add(userPlayer);
+		add(new Spacer());
+		add(userPlayer);
 		playerWidth += userPlayer.getPreferredSize().width;
 
 		if(model!=null)
@@ -183,15 +177,15 @@ public class EmbeddedRecorder extends JPanel
 			{
 				modelPlayer.setEnabled(false);
 			}
-			innerPanel.add(new Spacer());
-			innerPanel.add(modelPlayer);
+			add(new Spacer());
+			add(modelPlayer);
 			playerWidth += modelPlayer.getPreferredSize().width;
 		}
 
 		if(order != Order.LISTENFIRST)
 		{
-			innerPanel.add(new Spacer());
-			innerPanel.add(listenPlayer);
+			add(new Spacer());
+			add(listenPlayer);
 			if(!gotRecording)
 			{
 				listenPlayer.setEnabled(false);
@@ -255,53 +249,6 @@ public class EmbeddedRecorder extends JPanel
 				destroy();
 			}
 		});
-
-		// Layout manager doesn't set these buttons so they will not appear
-		after = new JButton("after");
-		add(after, null);
-		before = new JButton("before"); // Works as 'before' because of loop around
-		add(before, null);
-
-		// The before and after buttons are used to manage focus
-		before.addFocusListener(new FocusAdapter()
-		{
-			@Override
-			public void focusGained(FocusEvent arg0)
-			{
-				if(beforeAction == null)
-				{
-					// Loop around
-					after.transferFocusBackward();
-				}
-				else
-				{
-					// In applet, go back to where focus was before
-					before.transferFocus();
-					// Then run action which will probably send focus elsewhere
-					beforeAction.run();
-				}
-			}
-		});
-		after.addFocusListener(new FocusAdapter()
-		{
-			@Override
-			public void focusGained(FocusEvent arg0)
-			{
-				if(afterAction == null)
-				{
-					// Loop around
-					before.transferFocus();
-				}
-				else
-				{
-					// In applet, go back to where focus was before
-					after.transferFocusBackward();
-					// Then run action which will probably send focus elsewhere
-					afterAction.run();
-				}
-			}
-		});
-
 	}
 
 	private static class Spacer extends JComponent
@@ -375,23 +322,6 @@ public class EmbeddedRecorder extends JPanel
 			listenPlayer.setEnabled(enable);
 		}
 		userPlayer.setEnabled(enable);
-	}
-
-	/**
-	 * Focus a component.
-	 * @param last True if we want to focus the last component, false to get
-	 *   the first one
-	 */
-	void focusSomething(boolean last)
-	{
-		if(last)
-		{
-			after.transferFocusBackward();
-		}
-		else
-		{
-			before.transferFocus();
-		}
 	}
 
 	@Override
@@ -530,31 +460,5 @@ public class EmbeddedRecorder extends JPanel
 				other.stop();
 			}
 		}
-	}
-
-	/**
-	 * Special events that are called when focus reaches the start/end of
-	 * focus list, instead of looping round.
-	 * @param beforeAction Called whenever the 'before' component receives
-	 *   focus
-	 * @param afterAction Called whenever the 'after' component receives focus
-	 */
-	void addFocusHack(Runnable beforeAction, Runnable afterAction)
-	{
-		this.beforeAction = beforeAction;
-		this.afterAction = afterAction;
-	}
-
-	@Override
-	public void setBounds(int x, int y, int width, int height)
-	{
-		super.setBounds(x, y, width, height);
-		innerPanel.setBounds(0, 0, width, height);
-	}
-
-	@Override
-	public Dimension getPreferredSize()
-	{
-		return innerPanel.getPreferredSize();
 	}
 }

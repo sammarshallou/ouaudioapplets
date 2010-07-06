@@ -26,15 +26,18 @@ import java.util.HashMap;
 import javax.swing.*;
 
 import uk.ac.open.audio.adpcm.ADPCMRecording;
+import uk.ac.open.tabapplet.TabAppletFocuser;
 
 /** Main recording applet panel. */
-public class MainPanel extends JPanel
+public class MainPanel extends JPanel implements TabAppletFocuser
 {
 	private static final long serialVersionUID=1L;
 
 	private CardLayout cards=new CardLayout();
 
 	private boolean gotError;
+
+	private boolean ignoreFocusChange;
 
 	private PageBase currentPage;
 	/** Intro page */
@@ -87,11 +90,19 @@ public class MainPanel extends JPanel
 	 */
 	void setPage(String page)
 	{
+		ignoreFocusChange = true;
 		if(currentPage!=null)
 			currentPage.leave();
 		cards.show(this, page);
 		currentPage=pages.get(page);
 		currentPage.enter();
+		SwingUtilities.invokeLater(new Runnable()
+		{
+			public void run()
+			{
+				ignoreFocusChange = false;
+			}
+		});
 	}
 
 	/**
@@ -163,5 +174,20 @@ public class MainPanel extends JPanel
 		((Graphics2D)g).setRenderingHint(
 			RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		g.drawRoundRect(0, 0, getWidth()-1, getHeight()-1, 10, 10);
+	}
+
+	/**
+	 * @return True if we are in the process of changing page so focus change
+	 *   should be left to Java for a bit.
+	 */
+	boolean ignoreFocusChange()
+	{
+		return ignoreFocusChange;
+	}
+
+	@Override
+	public void initFocus(boolean last)
+	{
+		currentPage.initFocus(last);
 	}
 }

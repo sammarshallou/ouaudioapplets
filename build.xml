@@ -176,6 +176,7 @@ http://forum.java.sun.com/thread.jspa?threadID=174214
 			<include name="uk/ac/open/audio/*"/>
 			<include name="uk/ac/open/audio/adpcm/**"/>
 			<include name="uk/ac/open/audio/streaming/**"/>
+			<include name="uk/ac/open/tabapplet/**"/>
 			<include name="uk/ac/open/audiorecorder/**"/>
     	<exclude name="uk/ac/open/audiorecorder/AudioRecorderApp.java"/>
     </jar>
@@ -188,6 +189,7 @@ http://forum.java.sun.com/thread.jspa?threadID=174214
 			<include name="uk/ac/open/audio/mp3/**"/>
 			<include name="uk/ac/open/audio/streaming/**"/>
 			<include name="javazoom/**"/>
+			<include name="uk/ac/open/tabapplet/**"/>
 			<include name="uk/ac/open/embeddedrecorder/**"/>
     	<exclude name="uk/ac/open/embeddedrecorder/EmbeddedRecorderApp.java"/>
     </jar>

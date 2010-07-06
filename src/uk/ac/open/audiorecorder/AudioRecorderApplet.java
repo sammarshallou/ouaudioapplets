@@ -22,17 +22,24 @@ package uk.ac.open.audiorecorder;
 
 import java.io.IOException;
 
-import javax.swing.JApplet;
+import javax.swing.JComponent;
 
 import uk.ac.open.audio.RecordingDevice;
+import uk.ac.open.tabapplet.*;
 
 /** Applet version of audio recording tool. */
-public class AudioRecorderApplet extends JApplet
+public class AudioRecorderApplet extends TabApplet
 {
-	/** Constructs. */
-	public AudioRecorderApplet()
+	private MainPanel main;
+
+	@Override
+	protected JComponent getInner()
 	{
-		getContentPane().add(new MainPanel());
+		if(main == null)
+		{
+			main = new MainPanel();
+		}
+		return main;
 	}
 
 	@Override
@@ -48,5 +55,17 @@ public class AudioRecorderApplet extends JApplet
 			System.err.println("Error installing OS X extension");
 			e.printStackTrace();
 		}
+	}
+
+	@Override
+	protected boolean ignoreFocusChange()
+	{
+		return main.ignoreFocusChange();
+	}
+
+	@Override
+	protected TabAppletFocuser getFocuser()
+	{
+		return main;
 	}
 }
