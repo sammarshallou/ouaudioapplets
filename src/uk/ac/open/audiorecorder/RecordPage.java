@@ -147,6 +147,8 @@ public class RecordPage extends PageBase implements RecordingDevice.Handler
 			recording.stop();
 			getRecording().clear();
 			getLeft1Button().setText("Start recording");
+			getLeft2Button().setEnabled(false);
+			getRightButton().setEnabled(false);
 			waveform.recordingCleared();
 		}
 	}
