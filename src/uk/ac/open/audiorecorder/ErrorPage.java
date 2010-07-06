@@ -28,6 +28,8 @@ import java.util.Date;
 
 import javax.swing.*;
 
+import uk.ac.open.audio.AudioException;
+
 /**
  * Page displays applet errors.
  */
@@ -49,10 +51,27 @@ class ErrorPage extends JPanel
 
 		JLabel headingLabel = new FLabel(FontType.HEADING, "An error has occurred");
 		upper.add(headingLabel,BorderLayout.NORTH);
-		upper.add(new WrappedText("A system error has occurred. If you report this " +
-			"error, please include the entire text of the error in your email (using " +
-			"the copy button below). In the meantime, you might like to use alternative " +
-			"software to record your audio."),BorderLayout.SOUTH);
+		if((t instanceof AudioException) &&
+			t.getMessage().indexOf("TargetDataLine") != -1 &&
+			t.getMessage().indexOf("PCM_SIGNED") != -1)
+		{
+			upper.add(new WrappedText("This tool is currently unable to " +
+				"record audio using your computer.\n\n" +
+				"This can happen if your microphone or headset isn't plugged in. " +
+				"Please make sure it's properly connected, then " +
+				"close all windows of your web browser before trying again.\n\n" +
+				"If that does not help, there may be some other problem. If you report it, " +
+				"please include the entire text of the error in your email (using " +
+				"the copy button below). In the meantime, you might like to use alternative " +
+				"software to record your audio."),BorderLayout.SOUTH);
+		}
+		else
+		{
+			upper.add(new WrappedText("A system error has occurred. If you report this " +
+				"error, please include the entire text of the error in your email (using " +
+				"the copy button below). In the meantime, you might like to use alternative " +
+				"software to record your audio."),BorderLayout.SOUTH);
+		}
 
 		StringWriter sw=new StringWriter();
 		PrintWriter pw=new PrintWriter(sw);
