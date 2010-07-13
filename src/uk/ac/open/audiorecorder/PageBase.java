@@ -70,6 +70,35 @@ public abstract class PageBase extends JPanel implements TabAppletFocuser
 		add(main,BorderLayout.CENTER);
 
 		setOpaque(false);
+
+		getInputMap(WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(
+			KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0),
+			"actionSpecialEnter");
+		getActionMap().put("actionSpecialEnter", new AbstractAction()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				userPressedEnter();
+			}
+		});
+	}
+
+	/**
+	 * Function called when user presses Enter key; this version makes Enter
+	 * trigger the currently-focused button, if any.
+	 */
+	protected void userPressedEnter()
+	{
+		JButton[] buttons = { left1Button, left2Button, rightButton };
+		for(JButton button : buttons)
+		{
+			if(button != null && button.isFocusOwner())
+			{
+				button.doClick();
+				break;
+			}
+		}
 	}
 
 	/** Called when page is entered. */

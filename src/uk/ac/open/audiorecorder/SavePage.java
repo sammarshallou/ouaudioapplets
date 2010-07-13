@@ -234,4 +234,13 @@ public class SavePage extends PageBase
 			saveName.requestFocus();
 		}
 	}
+
+	@Override
+	protected void userPressedEnter()
+	{
+		if(saveButton.isEnabled())
+		{
+			saveButton.doClick();
+		}
+	}
 }
