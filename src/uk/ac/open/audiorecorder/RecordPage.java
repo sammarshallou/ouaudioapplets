@@ -149,7 +149,7 @@ public class RecordPage extends PageBase implements RecordingDevice.Handler
 			getLeft1Button().setText("Start recording");
 			getLeft2Button().setEnabled(false);
 			getRightButton().setEnabled(false);
-			waveform.recordingCleared();
+			waveform.recordingRestart();
 		}
 	}
 
@@ -166,6 +166,7 @@ public class RecordPage extends PageBase implements RecordingDevice.Handler
 		getLeft1Button().setText("Start recording");
 		getRightButton().setEnabled(false);
 		getLeft2Button().setEnabled(false);
+		waveform.recordingRestart();
 		try
 		{
 			recording=RecordingDevice.construct(false);

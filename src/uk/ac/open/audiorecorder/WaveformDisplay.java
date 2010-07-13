@@ -154,7 +154,7 @@ public class WaveformDisplay extends JComponent
 	 * Must be called when the recording is cleared, to go back to the start and
 	 * wipe the display
 	 */
-	void recordingCleared()
+	void recordingRestart()
 	{
 		position=0;
 		repaint();

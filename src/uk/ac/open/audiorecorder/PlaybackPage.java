@@ -74,7 +74,7 @@ public class PlaybackPage extends PageBase implements PlaybackDevice.Handler
 		{
 			playback=PlaybackDevice.construct(PlaybackDevice.Format.MONO_16KHZ, false);
 			adpcmPlayback.clear();
-			waveform.recordingCleared();
+			waveform.recordingRestart();
 			blocks=getRecording().getBlocks();
 		}
 		catch (Throwable t)
@@ -110,7 +110,7 @@ public class PlaybackPage extends PageBase implements PlaybackDevice.Handler
 			{
 				blockPos=0;
 				adpcmPlayback.clear();
-				waveform.recordingCleared();
+				waveform.recordingRestart();
 				try
 				{
 					playback.play(this, true);
