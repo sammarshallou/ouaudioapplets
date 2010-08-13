@@ -104,12 +104,24 @@ public class LevelMeter extends JComponent
 		{
 			if(levelBars>bar || maxRecentBar-1==bar)
 			{
+				Color color;
 				if(correctBars>bar)
-					g2.setColor(LOW);
+				{
+					color = LOW;
+				}
 				else if(highBars>bar)
-					g2.setColor(CORRECT);
+				{
+					color = CORRECT;
+				}
 				else
-					g2.setColor(HIGH);
+				{
+					color = HIGH;
+				}
+				if(levelBars <= bar)
+				{
+					color = new Color(color.getRed(), color.getGreen(), color.getBlue(), 100);
+				}
+				g2.setColor(color);
 			}
 			else
 			{
