@@ -76,7 +76,6 @@ public abstract class PageBase extends JPanel implements TabAppletFocuser
 			"actionSpecialEnter");
 		getActionMap().put("actionSpecialEnter", new AbstractAction()
 		{
-			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				userPressedEnter();
@@ -270,7 +269,6 @@ public abstract class PageBase extends JPanel implements TabAppletFocuser
 		});
 	}
 
-	@Override
 	public void initFocus(boolean last)
 	{
 		// Default focus is first button

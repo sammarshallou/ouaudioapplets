@@ -185,7 +185,6 @@ public class MainPanel extends JPanel implements TabAppletFocuser
 		return ignoreFocusChange;
 	}
 
-	@Override
 	public void initFocus(boolean last)
 	{
 		currentPage.initFocus(last);
