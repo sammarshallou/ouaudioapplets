@@ -100,6 +100,7 @@ public class MacRecordingDevice extends RecordingDevice
 		}
 		currentlyRecording.close();
 		device=NONE;
+		paused=false;
 	}
 
 	private class RecordingThread extends ClosableThread
