@@ -22,7 +22,7 @@ package uk.ac.open.audiorecorder;
 
 import java.io.IOException;
 
-import javax.swing.JFrame;
+import javax.swing.*;
 
 import uk.ac.open.audio.RecordingDevice;
 
@@ -48,11 +48,18 @@ public class AudioRecorderApp extends JFrame
 	{
 		try
 		{
+			UIManager.setLookAndFeel(
+				UIManager.getSystemLookAndFeelClassName());
 			RecordingDevice.macInstall(null, null);
 		}
 		catch (IOException e)
 		{
 			System.err.println("Error installing OS X extension");
+			e.printStackTrace();
+		}
+		catch(Exception e)
+		{
+			System.err.println("Error setting L&F");
 			e.printStackTrace();
 		}
 		new AudioRecorderApp();
