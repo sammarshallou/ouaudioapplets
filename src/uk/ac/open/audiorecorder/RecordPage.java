@@ -32,9 +32,17 @@ public class RecordPage extends PageBase implements RecordingDevice.Handler
 {
 	private static final long serialVersionUID=1L;
 
+	private static final int SILENCE_BEFORE_WARNING = 100;
+	private static final int LEVEL_ENTER_SILENCE = 15;
+	private static final int LEVEL_LEAVE_SILENCE = 100;
+
 	private WaveformDisplay waveform;
 
 	private RecordingDevice recording;
+
+	private WrappedText silenceWarning;
+
+	private int silence = 0;
 
 	/** @param owner Owning panel */
 	public RecordPage(MainPanel owner)
@@ -54,6 +62,17 @@ public class RecordPage extends PageBase implements RecordingDevice.Handler
 
 		waveform=new WaveformDisplay(getRecording());
 		lower.add(waveform,BorderLayout.NORTH);
+
+		JPanel evenLower = new JPanel(new BorderLayout(0, 8));
+		evenLower.setOpaque(false);
+		lower.add(evenLower, BorderLayout.CENTER);
+
+		silenceWarning = new WrappedText("Currently the recording is silent. " +
+			"If you are speaking, this is not being recorded; there " +
+			"might be a system problem. Try pausing the recording and " +
+			"disconnecting and reconnecting your microphone.");
+		evenLower.add(silenceWarning, BorderLayout.NORTH);
+		silenceWarning.setVisible(false);
 	}
 
 	private boolean isRecording=false;
@@ -81,6 +100,7 @@ public class RecordPage extends PageBase implements RecordingDevice.Handler
 			else
 			{
 				recording.pause();
+				silenceWarning.setVisible(false);
 
 				isRecording=false;
 				getLeft1Button().setText("Resume recording");
@@ -109,9 +129,52 @@ public class RecordPage extends PageBase implements RecordingDevice.Handler
 
 			if(bufferPos==buffer.length)
 			{
-		  	getRecording().addBlock(ADPCMEncoder.encodeBlock(buffer, 0, buffer.length));
-		  	waveform.recordingBlockAdded();
-		  	bufferPos=0;
+				ADPCMEncoder.Block block =
+					ADPCMEncoder.encodeBlock(buffer, 0, buffer.length);
+				getRecording().addBlock(block);
+				waveform.recordingBlockAdded();
+
+				// Check if block is silent
+				boolean currentlyWarning = silence >= SILENCE_BEFORE_WARNING;
+				if(currentlyWarning)
+				{
+					if(block.getMaxLevel() > LEVEL_LEAVE_SILENCE || 
+						block.getMinLevel() < -LEVEL_LEAVE_SILENCE)
+					{
+						SwingUtilities.invokeLater(new Runnable()
+						{
+							public void run()
+							{
+								silenceWarning.setVisible(false);
+							}
+						});
+						silence = 0;
+					}
+				}
+				else
+				{
+					if(block.getMaxLevel() <= LEVEL_ENTER_SILENCE && 
+						block.getMinLevel() >= -LEVEL_ENTER_SILENCE)
+					{
+						silence++;
+						if(silence == SILENCE_BEFORE_WARNING)
+						{
+							SwingUtilities.invokeLater(new Runnable()
+							{
+								public void run()
+								{
+									silenceWarning.setVisible(true);
+								}
+							});
+						}
+					}
+					else
+					{
+						silence = 0;
+					}
+				}
+
+				bufferPos=0;
 			}
 		}
 
@@ -122,9 +185,11 @@ public class RecordPage extends PageBase implements RecordingDevice.Handler
 			{
 				buffer[bufferPos]=0;
 			}
-	  	getRecording().addBlock(ADPCMEncoder.encodeBlock(buffer, 0, buffer.length));
-	  	waveform.recordingBlockAdded();
-	  	bufferPos=0;
+			ADPCMEncoder.Block block =
+				ADPCMEncoder.encodeBlock(buffer, 0, buffer.length);
+			getRecording().addBlock(block);
+			waveform.recordingBlockAdded();
+			bufferPos=0;
 		}
 	}
 
