@@ -36,7 +36,7 @@ public class SavePage extends PageBase
 
 	private JTextField saveName;
 
-	private JButton saveButton;
+	private JButton saveButton, cancelButton;
 
 	/**
 	 * Class has information about per-platform target location.
@@ -156,11 +156,17 @@ public class SavePage extends PageBase
 		boxPanel.setOpaque(false);
 		boxPanel.add(saveName,BorderLayout.WEST);
 		boxPanel.add(dotWav,BorderLayout.EAST);
+		savePanel.add(boxPanel,BorderLayout.WEST);
 
+		JPanel buttonPanel = new JPanel(new BorderLayout(2,0));
+		buttonPanel.setOpaque(false);
 		saveButton = new FButton("Save");
 		saveButton.setEnabled(false);
-		savePanel.add(boxPanel,BorderLayout.WEST);
-		savePanel.add(saveButton,BorderLayout.EAST);
+		buttonPanel.add(saveButton, BorderLayout.WEST);
+		savePanel.add(buttonPanel, BorderLayout.EAST);
+
+		cancelButton = new FButton("Cancel");
+		buttonPanel.add(cancelButton, BorderLayout.EAST);
 
 		final Color normalForeground=saveName.getForeground();
 
@@ -211,6 +217,13 @@ public class SavePage extends PageBase
 			}
 		});
 
+		cancelButton.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent ev)
+			{
+				getOwner().setPage(MainPanel.PAGE_PLAYBACK);
+			}
+		});
 	}
 
 	@Override
@@ -238,9 +251,16 @@ public class SavePage extends PageBase
 	@Override
 	protected void userPressedEnter()
 	{
-		if(saveButton.isEnabled())
+		if(cancelButton.hasFocus())
 		{
-			saveButton.doClick();
+			cancelButton.doClick();
+		}
+		else
+		{
+			if(saveButton.isEnabled())
+			{
+				saveButton.doClick();
+			}
 		}
 	}
 }
