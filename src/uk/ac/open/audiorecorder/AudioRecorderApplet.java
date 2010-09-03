@@ -50,6 +50,7 @@ public class AudioRecorderApplet extends TabApplet
 		{
 			UIManager.setLookAndFeel(
 				UIManager.getSystemLookAndFeelClassName());
+			SwingUtilities.updateComponentTreeUI(this);
 			RecordingDevice.macInstall(getCodeBase(),AudioRecorderApplet.class);
 		}
 		catch (IOException e)
