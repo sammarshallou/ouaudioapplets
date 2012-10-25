@@ -24,7 +24,7 @@ import java.io.InputStream;
 
 import javazoom.jl.decoder.*;
 import uk.ac.open.audio.*;
-import uk.ac.open.audio.streaming.StreamableDecoder;
+import uk.ac.open.audio.streaming.*;
 
 /**
  * This class decodes MP3 data using the JLayer library. It converts all data
@@ -45,7 +45,11 @@ public class MP3Decoder implements StreamableDecoder
 	{
 		try
 		{
-	  	d=new Decoder();
+			d = new Decoder();
+			if (!input.markSupported())
+			{
+				input = new MarkResetStream(input);
+			}
 	  	b=new Bitstream(input,false);
 	  	h=b.readFrame();
 	  	if(h==null) throw new AudioException("Cannot play empty MP3");
