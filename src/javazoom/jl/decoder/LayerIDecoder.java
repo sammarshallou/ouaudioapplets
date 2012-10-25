@@ -395,6 +395,19 @@ class LayerIDecoder implements FrameDecoder
 	  {
 	 	 allocation = stream.get_bits(4);
 	     channel2_allocation = stream.get_bits(4);
+// sam edit begins
+	     // This will detect corrupt files (...or buggy input stream handling).
+	     // Note JLayer already has similar code for certain places but not this
+	     // one.
+	    if (allocation == 15) 
+	    {
+	    	throw new DecoderException(DecoderErrors.ILLEGAL_SUBBAND_ALLOCATION, null);    	
+	    }
+	    if (channel2_allocation == 15) 
+	    {
+	    	throw new DecoderException(DecoderErrors.ILLEGAL_SUBBAND_ALLOCATION, null);    	
+	    }
+// sam edit ends
 	     if (crc != null)
 	     {
 		   crc.add_bits (allocation, 4);
