@@ -151,13 +151,18 @@ public final class Bitstream implements BitstreamErrors
 	 * @param in	The InputStream to read from.
 	 * @param bufferInput If true, buffers input (this is recommended unless
 	 *   the input stream is already buffered)
+	 * @throws IllegalArgumentException If the input stream doesn't support mark/reset
 	 */
-	public Bitstream(InputStream in,boolean bufferInput)
+	public Bitstream(InputStream in,boolean bufferInput) throws IllegalArgumentException
 	{
 		if (in==null) throw new NullPointerException("in");
 		if(bufferInput)
 		{
 			in = new BufferedInputStream(in);
+		}
+		else if(!in.markSupported())
+		{
+			throw new IllegalArgumentException("InputStream must support mark");
 		}
 		loadID3v2(in);
 		firstframe = true;
