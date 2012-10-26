@@ -20,7 +20,7 @@ If not, see <http://www.gnu.org/licenses/>.
 */
 package uk.ac.open.embeddedrecorder;
 
-import java.awt.Color;
+import java.awt.*;
 import java.io.IOException;
 import java.net.*;
 import java.util.regex.*;
@@ -44,6 +44,7 @@ public class EmbeddedRecorderApplet extends TabApplet
 		"#([0-9A-F]{2})([0-9A-F]{2})([0-9A-F]{2})");
 
 	private EmbeddedRecorder recorder;
+	private JComponent owner;
 
 	/** @return Recorder for this applet */
 	EmbeddedRecorder getRecorder()
@@ -54,7 +55,12 @@ public class EmbeddedRecorderApplet extends TabApplet
 	@Override
 	protected JComponent getInner()
 	{
-		return recorder;
+		if(owner == null)
+		{
+			owner = new JPanel(new BorderLayout());
+			owner.setOpaque(false);
+		}
+		return owner;
 	}
 
 	@Override
@@ -155,7 +161,7 @@ public class EmbeddedRecorderApplet extends TabApplet
 				colours[COL_DARK], colours[COL_LIGHT], colours[COL_FAINT],
 				colours[COL_ALTDARK], colours[COL_ALTLIGHT], colours[COL_ALTFAINT],
 				colours[COL_CORNERS], crossPlatformAudio);
-			getContentPane().add(recorder);
+			getInner().add(recorder, BorderLayout.CENTER);
 		}
 		catch(MalformedURLException e)
 		{
