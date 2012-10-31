@@ -40,7 +40,7 @@ public interface StreamableDecoder
 	/**
 	 * Retrieves audio data. Blocks until sufficient data is available from the
 	 * InputStream.
-	 * @return Decoded data in 16-bit 44.1kHz stereo little-endian
+	 * @return Decoded data in 16-bit 44.1kHz stereo little-endian, null at EOF
 	 * @throws AudioException If there's any problem
 	 */
 	public byte[] decode() throws AudioException;

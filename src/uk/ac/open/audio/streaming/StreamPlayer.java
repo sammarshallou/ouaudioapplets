@@ -26,6 +26,8 @@ import java.util.*;
 
 import uk.ac.open.audio.*;
 
+import static uk.ac.open.audio.streaming.StreamPlayer.State.*;
+
 /**
  * Handles streaming, delaying as necessary, and playing audio; and replay from
  * downloaded version at later date.
@@ -98,7 +100,7 @@ public class StreamPlayer
 	  CLOSED
 	}
 
-	private State currentState=State.WAITBEFOREPLAY;
+	private State currentState = WAITBEFOREPLAY;
 
 	private AudioDecoder audioDecoder;
 	private Downloader downloader;
@@ -412,17 +414,26 @@ public class StreamPlayer
 			notifyAll();
 		}
 		// Only send the 'fully loaded' state if we're already in READYTOPLAY
-		if(finished && currentState==State.READYTOPLAY)
+		if(finished && currentState==READYTOPLAY)
 		{
 			h.updateStats(data.size()-1*BUFFERSIZE+(block==null ? 0 : block.length),length,100.0,
 					(int)recentBytesPerSecondDownload,(int)averageBytesPerSecondPlayback,
 					0);
-			setState(State.FULLYLOADED);
+			setState(FULLYLOADED);
 			return;
 		}
 
 		// Download percentage
-		int bytesDownloaded=data.size()*BUFFERSIZE;
+		int bytesDownloaded;
+		if(data.size() > 1)
+		{
+			// All blocks except last one are full blocks
+			bytesDownloaded = (data.size() - 1) * BUFFERSIZE + data.getLast().getData().length;
+		}
+		else
+		{
+			bytesDownloaded = 0;
+		}
 		double percentageDownloaded=-1.0;
 
 		if(length!=UNKNOWN)
@@ -451,19 +462,19 @@ public class StreamPlayer
 		// Note that it may yo-yo between these states, so a player shouldn't really
 		// stop playing if state switches to WAITBEFOREPLAY - only stop when audio
 		// runs out. But start again when READYTOPLAY hits again.
-		if(currentState==State.WAITBEFOREPLAY && readyToPlay)
+		if(currentState==WAITBEFOREPLAY && readyToPlay)
 		{
-			setState(State.READYTOPLAY);
+			setState(READYTOPLAY);
 			if(finished)
 			{
-				setState(State.FULLYLOADED);
+				setState(FULLYLOADED);
 			}
 		}
-		else if(currentState==State.READYTOPLAY && !readyToPlay)
+		else if(currentState==READYTOPLAY && !readyToPlay)
 		{
-			setState(State.WAITBEFOREPLAY);
+			setState(WAITBEFOREPLAY);
 		}
-		else if(currentState==State.WAITBEFOREPLAY && finished)
+		else if(currentState==WAITBEFOREPLAY && finished)
 		{
 			// Not ready to play yet, so can't send that state. Instead start a timer
 			// and try again in 50ms.
@@ -509,8 +520,8 @@ public class StreamPlayer
 						int delay=getAppropriatePlaybackDelay();
 						if(delay==0)
 						{
-							setState(StreamPlayer.State.READYTOPLAY);
-							setState(StreamPlayer.State.FULLYLOADED);
+							setState(READYTOPLAY);
+							setState(FULLYLOADED);
 							return;
 						}
 					}
@@ -637,9 +648,9 @@ public class StreamPlayer
 	 */
 	public synchronized boolean hasNextAudio()
 	{
-		if(nextAudio.isEmpty() && currentState == State.FULLYLOADED && !playFinished)
+		if(nextAudio.isEmpty() && currentState == FULLYLOADED && !playFinished)
 		{
-			setState(State.BUFFEREMPTY);
+			setState(BUFFEREMPTY);
 		}
 		return playFinished || !nextAudio.isEmpty();
 	}
@@ -707,9 +718,9 @@ public class StreamPlayer
 					{
 						while(nextAudio.size()>=AUDIOBLOCKBUFFER && !shouldClose())
 						{
-							if(currentState == StreamPlayer.State.BUFFEREMPTY)
+							if(currentState == BUFFEREMPTY)
 							{
-								setState(StreamPlayer.State.FULLYLOADED);
+								setState(FULLYLOADED);
 							}
 							StreamPlayer.this.wait();
 						}
@@ -791,9 +802,14 @@ public class StreamPlayer
 						StreamPlayer.this.notifyAll();
 						if(audio==null)
 						{
-							if(currentState == StreamPlayer.State.BUFFEREMPTY)
+							if(currentState == BUFFEREMPTY)
 							{
-								setState(StreamPlayer.State.FULLYLOADED);
+								setState(FULLYLOADED);
+							}
+							else if(currentState == WAITBEFOREPLAY)
+							{
+								setState(READYTOPLAY);
+								setState(FULLYLOADED);
 							}
 							playFinished=true;
 							blockInput.close();
