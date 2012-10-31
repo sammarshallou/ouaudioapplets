@@ -43,11 +43,13 @@ public class Uploader
 		ARTIFICIALDELAY_BPS=bps;
 		if(bps==0)
 		{
-			System.err.println("Artifical delay: upload delay disabled");
+			System.err.println("[uk.ac.open.audio.streaming.Uploader] " +
+				"Upload delay disabled");
 		}
 		else
 		{
-			System.err.println("Artifical delay: simulating uploads at "+ARTIFICIALDELAY_BPS+" bytes/s");
+			System.err.println("[uk.ac.open.audio.streaming.Uploader] " +
+				"Simulating uploads at "+ARTIFICIALDELAY_BPS+" bytes/s");
 		}
 	}
 

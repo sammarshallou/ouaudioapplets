@@ -55,12 +55,14 @@ public class AudioRecorderApplet extends TabApplet
 		}
 		catch (IOException e)
 		{
-			System.err.println("Error installing OS X extension");
+			System.err.println("[uk.ac.open.audiorecorder.AudioRecorderApplet] " +
+				"Error installing OS X extension");
 			e.printStackTrace();
 		}
 		catch(Exception e)
 		{
-			System.err.println("Error setting L&F");
+			System.err.println("[uk.ac.open.audiorecorder.AudioRecorderApplet] " +
+				"Error setting L&F");
 			e.printStackTrace();
 		}
 	}

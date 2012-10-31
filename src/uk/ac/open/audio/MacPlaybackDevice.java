@@ -65,7 +65,8 @@ public class MacPlaybackDevice extends PlaybackDevice
 		}
 		catch(MacAudioException e)
 		{
-			System.err.println("Error when closing audio device");
+			System.err.println("[uk.ac.open.audio.MacPlaybackDevice] " +
+				"Error when closing audio device");
 			e.printStackTrace();
 		}
 	}

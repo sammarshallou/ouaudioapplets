@@ -216,13 +216,14 @@ public abstract class RecordingDevice
 				}
 			}
 
-      FileOutputStream output=new FileOutputStream(macDynamicLibraryFile);
-      output.write(data);
-      output.close();
+			FileOutputStream output=new FileOutputStream(macDynamicLibraryFile);
+			output.write(data);
+			output.close();
 
-      System.err.println("The OS X extension library for audio has been " +
-      	"installed in "+macDynamicLibraryFile+". This file is required to work around bugs in " +
-      	"Apple's operating system.");
+			System.err.println("[uk.ac.open.audio.RecordingDevice] " +
+				"The OS X extension library for audio has been " +
+				"installed in "+macDynamicLibraryFile+". This file is required to work around bugs in " +
+				"Apple's operating system.");
 		}
 
 		if(!macInited)

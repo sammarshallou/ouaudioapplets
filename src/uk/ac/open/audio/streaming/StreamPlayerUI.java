@@ -43,6 +43,21 @@ public class StreamPlayerUI extends JPanel implements
 {
 	private final static int MARGIN=2;
 
+	/**
+	 * Connect timeout.
+	 */
+	private final static int CONNECT_TIMEOUT = 10000;
+
+	/**
+	 * Read timeout.
+	 */
+	private final static int READ_TIMEOUT = 30000;
+
+	/**
+	 * 3 connect retries.
+	 */
+	private final static int CONNECT_RETRIES = 3;
+
 	private enum ButtonState
 	{
 		START,STOP,CANCELUPLOAD
@@ -72,6 +87,8 @@ public class StreamPlayerUI extends JPanel implements
 	private boolean close;
 
 	private LinkedList<Listener> listeners = new LinkedList<Listener>();
+
+	private Connector connector;
 
 	/** For anyone who wants to listen to events from this player. */
 	public interface Listener
@@ -275,15 +292,18 @@ public class StreamPlayerUI extends JPanel implements
 				playback=PlaybackDevice.construct(PlaybackDevice.Format.STEREO_44KHZ, forceCrossPlatform);
 				if(stream==null)
 				{
-					progress.setIndeterminate();
-					HttpURLConnection connection=(HttpURLConnection)playURL.openConnection();
-					boolean mp3=playURL.getPath().endsWith(".mp3");
-					if(!mp3 && !playURL.getPath().endsWith(".wav"))
-						throw new Exception("Unsupported filetype: only MP3 or WAV permitted");
+					if(connector == null)
+					{
+						progress.setIndeterminate();
+						boolean mp3=playURL.getPath().endsWith(".mp3");
+						if(!mp3 && !playURL.getPath().endsWith(".wav"))
+							throw new Exception("Unsupported filetype: only MP3 or WAV permitted");
 
-					stream=new StreamPlayer(connection.getInputStream(),
-						connection.getContentLength(),
-						mp3 ? MP3Decoder.class : ADPCMDecoder.class ,this);
+						// Connect to the URL in a different thread. Sometimes, the URL connection
+						// hangs, so this is not safe to do in the UI thread.
+						connector = new Connector(playURL,
+							mp3 ? MP3Decoder.class : ADPCMDecoder.class);
+					}
 				}
 				else
 				{
@@ -334,6 +354,180 @@ public class StreamPlayerUI extends JPanel implements
 		}
 	}
 
+	/**
+	 * Thread handles URL connection and starts stream player.
+	 */
+	private class Connector extends Thread
+	{
+		private URL url;
+		private Class<? extends StreamableDecoder> decoderClass;
+		private ConnectKiller killer;
+		private int attempts;
+
+		Connector(URL url, Class<? extends StreamableDecoder> decoderClass)
+		{
+			this(url, decoderClass, CONNECT_RETRIES);
+		}
+
+		private Connector(URL url, Class<? extends StreamableDecoder> decoderClass,
+			int attempts)
+		{
+			this.url = url;
+			this.decoderClass = decoderClass;
+			this.attempts = attempts;
+			start();
+		}
+
+		private class ConnectKiller extends Thread
+		{
+			ConnectKiller()
+			{
+				start();
+			}
+
+			@Override
+			public void run()
+			{
+				try
+				{
+					// Wait until after it should have connected
+					sleep(CONNECT_TIMEOUT + 500);
+					synchronized(Connector.this)
+					{
+						if(killer == this)
+						{
+							// Setting the killer variable to null will kill this connection
+							log("Undetected timeout connecting to URL:");
+							System.err.println(url);
+							killer = null;
+
+							// If there are retries left, start a new one
+							if(attempts > 0)
+							{
+								log("Retrying");
+								new Connector(url, decoderClass, attempts);
+							}
+							else
+							{
+								log("No more retries, stopping");
+								failed();
+							}
+						}
+					}
+				}
+				catch(InterruptedException e)
+				{
+					// This shouldn't happen
+				}
+			}
+		}
+
+		@Override
+		public void run()
+		{
+			while(true)
+			{
+				try
+				{
+					attempts--;
+					connect();
+					return;
+				}
+				catch(SocketTimeoutException e)
+				{
+					killer = null;
+					log("Timeout connecting to URL:");
+					System.err.println(url);
+					if(attempts > 0)
+					{
+						log("Retrying");
+					}
+					else
+					{
+						log("No more retries, stopping");
+						failed();
+						return;
+					}
+				}
+				catch(IOException e)
+				{
+					log("Error connecting to URL:");
+					System.err.println(url);
+					e.printStackTrace();
+					return;
+				}
+			}
+		}
+
+		/**
+		 * Called when there are no more retries, to cancel playback.
+		 */
+		private void failed()
+		{
+			SwingUtilities.invokeLater(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					synchronized(StreamPlayerUI.this)
+					{
+						progress.setError();
+						try
+						{
+							playback.stop();
+						}
+						catch (AudioException e)
+						{
+							playbackError(e);
+						}
+						connector = null;
+						setButtonState(ButtonState.START);
+					}
+				}
+			});
+		}
+
+		private void connect() throws IOException
+		{
+			// Kill request even if the connect timeout doesn't work
+			synchronized(this)
+			{
+				killer = new ConnectKiller();
+			}
+			HttpURLConnection connection = (HttpURLConnection)playURL.openConnection();
+			connection.setConnectTimeout(CONNECT_TIMEOUT);
+			connection.setReadTimeout(READ_TIMEOUT);
+			InputStream input = connection.getInputStream();
+			int length = connection.getContentLength();
+			synchronized(this)
+			{
+				// If this completes after we were killed, drop the connection and do
+				// nothing.
+				if(killer == null)
+				{
+					connection.disconnect();
+					return;
+				}
+				// OK, now we are safe so drop the killer.
+				killer = null;
+			}
+			synchronized(StreamPlayerUI.this)
+			{
+				stream = new StreamPlayer(input, length, decoderClass, StreamPlayerUI.this);
+				connector = null;
+			}
+		}
+	}
+
+	/**
+	 * Display error message with standard format.
+	 * @param message Message text
+	 */
+	private static void log(String message)
+	{
+		System.err.println("[uk.ac.open.audio.streaming.StreamPlayerUI] " + message);
+	}
+
 	private void startRecording() throws AudioException
 	{
 		recording=RecordingDevice.construct(forceCrossPlatform);
@@ -382,7 +576,14 @@ public class StreamPlayerUI extends JPanel implements
 					playbackError(e);
 				}
 			}
-			stream.rewind();
+			if(stream != null)
+			{
+				stream.rewind();
+			}
+			if(connector != null)
+			{
+				connector = null;
+			}
 			progress.setBlank();
 			playback.close();
 			playback=null;

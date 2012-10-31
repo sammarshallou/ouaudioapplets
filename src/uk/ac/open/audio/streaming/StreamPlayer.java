@@ -53,6 +53,11 @@ public class StreamPlayer
 	private static int ARTIFICIALDELAY_BPS=0;
 
 	/**
+	 * If enabled, logs additional messages.
+	 */
+	private static boolean DETAILED_LOG = false;
+
+	/**
 	 * Sets download delay simulation.
 	 * @param bps Simulated bytes per second
 	 */
@@ -61,12 +66,26 @@ public class StreamPlayer
 		ARTIFICIALDELAY_BPS=bps;
 		if(bps==0)
 		{
-			System.err.println("Artifical delay: download delay disabled");
+			log("Download delay disabled", false);
 		}
 		else
 		{
-			System.err.println("Artifical delay: simulating downloads at "+ARTIFICIALDELAY_BPS+" bytes/s");
+			log("Simulating downloads at " + ARTIFICIALDELAY_BPS + " bytes/s", false);
 		}
+	}
+
+	/**
+	 * Displays an error message in standard format.
+	 * @param message Message
+	 * @param detail If true, only logs when detailed logging is on
+	 */
+	private static void log(String message, boolean detail)
+	{
+		if(detail && !DETAILED_LOG)
+		{
+			return;
+		}
+		System.err.println("[uk.ac.open.audio.streaming.StreamPlayer] " + message);
 	}
 
 	private final Class<? extends StreamableDecoder> decoderClass;
@@ -142,6 +161,7 @@ public class StreamPlayer
 	{
 		currentState=newState;
 		h.streamChangedState(currentState);
+		log("Stream state: " + newState, true);
 	}
 
 	private final Handler h;
@@ -326,6 +346,12 @@ public class StreamPlayer
 	{
 		int msDelay=999999;
 
+		// Check if we already downloaded the whole file, if so we can start now
+		if(bytesDownloaded >= bytesLength && totalSamplesDecoded > 0)
+		{
+			return 0;
+		}
+
 		// If we're downloading faster than playback, then we can potentially start
 		// for that reason
 		double speedFactor = recentBPSDownload / averageBPSPlayback;
@@ -424,16 +450,7 @@ public class StreamPlayer
 		}
 
 		// Download percentage
-		int bytesDownloaded;
-		if(data.size() > 1)
-		{
-			// All blocks except last one are full blocks
-			bytesDownloaded = (data.size() - 1) * BUFFERSIZE + data.getLast().getData().length;
-		}
-		else
-		{
-			bytesDownloaded = 0;
-		}
+		int bytesDownloaded = getDataSize();
 		double percentageDownloaded=-1.0;
 
 		if(length!=UNKNOWN)
@@ -534,6 +551,19 @@ public class StreamPlayer
 		}
 	}
 
+	private int getDataSize()
+	{
+		if(data.size() >= 1)
+		{
+			// All blocks except last one are full blocks
+			return (data.size() - 1) * BUFFERSIZE + data.getLast().getData().length;
+		}
+		else
+		{
+			return 0;
+		}
+	}
+
 	/**
 	 * @return 0 if ready to start playing now, otherwise UNKNOWN or a time
 	 *   in milliseconds
@@ -547,7 +577,7 @@ public class StreamPlayer
 		{
 			// Okay, we're ready to play but ONLY if the download speeds are okay
 			estimatedDelay=getAppropriatePlaybackDelay(
-				data.size()*BUFFERSIZE,length,firstFrameBytes,firstFrameSamples,
+				getDataSize(),length,firstFrameBytes,firstFrameSamples,
 				totalSamplesDecoded,
 				averageBytesPerSecondPlayback,recentBytesPerSecondDownload);
 		}
@@ -689,6 +719,7 @@ public class StreamPlayer
 			firstFrameSamples=0;
 			nextAudio.clear();
 			start();
+
 		}
 
 		@Override

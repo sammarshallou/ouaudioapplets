@@ -218,7 +218,7 @@ public abstract class PlaybackDevice
 	{
 		if(RecordingDevice.usingMacLibrary() && !forceCrossPlatform)
 		{
-			System.err.println("Using Mac playback");
+			System.err.println("[uk.ac.open.audio.PlaybackDevice] Using Mac playback");
 			try
 			{
 				return (PlaybackDevice)Class.forName(
@@ -240,7 +240,7 @@ public abstract class PlaybackDevice
 		}
 		else
 		{
-			System.err.println("Using Java playback");
+			System.err.println("[uk.ac.open.audio.PlaybackDevice] Using Java playback");
 			return new JavaSoundPlaybackDevice(format);
 		}
 	}

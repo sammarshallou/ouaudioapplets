@@ -148,7 +148,8 @@ class LayerIDecoder implements FrameDecoder
 	}
 	catch(ArrayIndexOutOfBoundsException e)
 	{
-		System.err.println("JLayer (MP3 decoder): Glitch, skipping frame");
+		System.err.println("[javazoom.jl.decoder.LayerIDecoder] " +
+			"Glitch, skipping frame");
 	}
 //sam end		
 	}

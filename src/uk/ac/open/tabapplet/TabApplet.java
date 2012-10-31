@@ -59,8 +59,8 @@ public abstract class TabApplet extends JApplet
 		}
 		if(oldJava)
 		{
-			System.err.println("Old Java version < 1.6.0_13 in use; Tab key not " +
-				"fully supported");
+			System.err.println("[uk.ac.open.tabapplet.TabApplet] " +
+				"Old Java version < 1.6.0_13 in use; Tab key not fully supported");
 		}
 	}
 
@@ -231,7 +231,8 @@ public abstract class TabApplet extends JApplet
 		}
 		catch (ClassNotFoundException ex)
 		{
-			System.err.println("JSObject support not found, ignoring (keyboard focus may not work)");
+			System.err.println("[uk.ac.open.tabapplet.TabApplet] " +
+				"JSObject support not found, ignoring (keyboard focus may not work)");
 		}
 		catch(Exception ex)
 		{

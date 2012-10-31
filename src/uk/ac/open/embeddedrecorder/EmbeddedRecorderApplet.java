@@ -125,7 +125,8 @@ public class EmbeddedRecorderApplet extends TabApplet
 		}
 		catch (IOException e)
 		{
-			System.err.println("Error installing OS X extension");
+			System.err.println("[uk.ac.open.embeddedrecorder.EmbeddedRecorderApplet] " +
+				"Error installing OS X extension");
 			e.printStackTrace();
 		}
 

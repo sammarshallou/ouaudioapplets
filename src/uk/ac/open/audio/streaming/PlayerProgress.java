@@ -185,6 +185,15 @@ public class PlayerProgress extends JComponent
 				barFadeThread = new BarFadeThread();
 			}
 		}
+		if(state == State.ERROR)
+		{
+			playMilliseconds=0;
+			playPercentage=0.0;
+			if(barOpacity!=0 && barFadeThread == null)
+			{
+				barFadeThread = new BarFadeThread();
+			}
+		}
 
 		repaint();
 

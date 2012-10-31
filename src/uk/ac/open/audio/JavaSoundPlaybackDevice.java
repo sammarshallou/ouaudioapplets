@@ -39,7 +39,8 @@ class JavaSoundPlaybackDevice extends PlaybackDevice
 		else
 		{
 			PLAYLATENCYMS=Integer.parseInt(l);
-			System.err.println("Playback latency set to "+PLAYLATENCYMS);
+			System.err.println("[uk.ac.open.audio.JavaSoundPlaybackDevice] " +
+				"Playback latency set to "+PLAYLATENCYMS);
 		}
 	}
 
