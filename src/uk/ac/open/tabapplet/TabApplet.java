@@ -17,6 +17,9 @@ public abstract class TabApplet extends JApplet
 {
 	protected static boolean oldJava;
 
+	/** If enabled, outputs extra junk to Java console. */
+	private static boolean VERBOSE = false;
+
 	private final static Pattern REGEX_VERSION = Pattern.compile(
 		"([0-9]+)\\.([0-9]+)\\.([0-9]+)(?:_([0-9]+))?(-.*)?");
 
@@ -24,6 +27,8 @@ public abstract class TabApplet extends JApplet
 
 	private JButton before, after;
 	private Runnable beforeAction, afterAction;
+
+	private boolean internalIgnoreFocusChange;
 
 	/** Static code detects old Java version */
 	static
@@ -62,6 +67,11 @@ public abstract class TabApplet extends JApplet
 			System.err.println("[uk.ac.open.tabapplet.TabApplet] " +
 				"Old Java version < 1.6.0_13 in use; Tab key not fully supported");
 		}
+		if(VERBOSE)
+		{
+			System.err.println("[uk.ac.open.tabapplet.TabApplet] " +
+				"Applet init (Java version: " + version + ")");
+		}
 	}
 
 	/**
@@ -89,6 +99,35 @@ public abstract class TabApplet extends JApplet
 		return null;
 	}
 
+	private void focusLog(String message)
+	{
+		if(VERBOSE)
+		{
+			String time = String.format("%tH:%<tM:%<tS.%<tL", System.currentTimeMillis());
+			System.err.println("[uk.ac.open.tabapplet.TabApplet] " + time + " " + focusHackId +
+				": " + message);
+		}
+	}
+
+	private void invokeAfterDelay(final long delay, final Runnable r)
+	{
+		Thread t = new Thread(new Runnable()
+		{
+			public void run()
+			{
+				try
+				{
+					Thread.sleep(delay);
+				}
+				catch(InterruptedException e)
+				{
+				}
+				SwingUtilities.invokeLater(r);
+			}
+		});
+		t.start();
+	}
+
 	public TabApplet()
 	{
 		getContentPane().setLayout(null);
@@ -108,9 +147,11 @@ public abstract class TabApplet extends JApplet
 			@Override
 			public void focusGained(FocusEvent arg0)
 			{
+				focusLog("focusGained (before)");
 				// Special case so owner can temporarily disable focus change
-				if(ignoreFocusChange())
+				if(ignoreFocusChange() || internalIgnoreFocusChange)
 				{
+					focusLog("focusGained - ignore");
 					return;
 				}
 				if(beforeAction == null)
@@ -120,8 +161,10 @@ public abstract class TabApplet extends JApplet
 				}
 				else
 				{
+					focusLog("focusGained - transfer");
 					// In applet, go back to where focus was before
 					before.transferFocus();
+					focusLog("focusGained - action");
 					// Then run action which will probably send focus elsewhere
 					beforeAction.run();
 				}
@@ -132,9 +175,11 @@ public abstract class TabApplet extends JApplet
 			@Override
 			public void focusGained(FocusEvent arg0)
 			{
-				// Special case so owner can temporarily disable focus change 
-				if(ignoreFocusChange())
+				focusLog("focusGained (after)");
+				// Special case so owner can temporarily disable focus change
+				if(ignoreFocusChange() || internalIgnoreFocusChange)
 				{
+					focusLog("focusGained - ignore");
 					return;
 				}
 				if(afterAction == null)
@@ -144,8 +189,10 @@ public abstract class TabApplet extends JApplet
 				}
 				else
 				{
+					focusLog("focusGained - transfer");
 					// In applet, go back to where focus was before
 					after.transferFocusBackward();
+					focusLog("focusGained - action");
 					// Then run action which will probably send focus elsewhere
 					afterAction.run();
 				}
@@ -165,6 +212,18 @@ public abstract class TabApplet extends JApplet
 	{
 		super.init();
 
+		// Disable focus processing for a bit - for some reason it tends to get
+		// focused as soon as it appears, which causes it to ditch focus off
+		// somewhere stupid.
+		internalIgnoreFocusChange = true;
+		invokeAfterDelay(100, new Runnable()
+		{
+			public void run()
+			{
+				internalIgnoreFocusChange = false;
+			}
+		});
+
 		// Get the focus hack setting. If enabled, the system does custom
 		// processing to call JavaScript function in the host page, at the point
 		// where it ought to release keyboard focus
@@ -180,6 +239,7 @@ public abstract class TabApplet extends JApplet
 				throw new IllegalArgumentException("Invalid focushackid: " +
 					focusHackId + ". Expecting A-Z, a-z, 0-9, _ only.");
 			}
+			focusLog("Focus hack enabled");
 
 			// Listen for focus falling off the ends
 			this.beforeAction = new Runnable()
@@ -211,7 +271,13 @@ public abstract class TabApplet extends JApplet
 	private void ditchFocus(boolean forward)
 	{
 		// Tell JavaScript to ditch focus for this applet id
-		evalJS("appletDitchFocus('"+focusHackId+"', "+forward+");");
+		String js = "appletDitchFocus('"+focusHackId+"', "+forward+");";
+		if(VERBOSE)
+		{
+			System.err.println("[uk.ac.open.tabapplet.TabApplet] " + focusHackId +
+				": Ditching focus via JS. " + js);
+		}
+		evalJS(js);
 	}
 
 	private void evalJS(String js)
@@ -243,7 +309,13 @@ public abstract class TabApplet extends JApplet
 	private void appletLoaded()
 	{
 		// Tell JavaScript this applet is ready
-		evalJS("appletLoaded('"+focusHackId+"');");
+		String js = "appletLoaded('"+focusHackId+"');";
+		if(VERBOSE)
+		{
+			System.err.println("[uk.ac.open.tabapplet.TabApplet] " + focusHackId +
+				": Reporting applet loaded. " + js);
+		}
+		evalJS(js);
 	}
 
 	/**
@@ -252,6 +324,7 @@ public abstract class TabApplet extends JApplet
 	 */
 	public void initFocus(final boolean last)
 	{
+		focusLog("Received initFocus call from JS (" + last + ")");
 		Runnable r = new Runnable()
 		{
 			public void run()
@@ -259,16 +332,43 @@ public abstract class TabApplet extends JApplet
 				TabAppletFocuser focuser = getFocuser();
 				if(focuser != null)
 				{
+					focusLog("Calling focuser");
 					focuser.initFocus(last);
 					return;
 				}
 				if(last)
 				{
-					after.transferFocusBackward();
+					focusLog("Requesting last focus (1)");
+					internalIgnoreFocusChange = true;
+					after.requestFocusInWindow();
+					after.requestFocus();
+					invokeAfterDelay(250, new Runnable()
+					{
+						public void run()
+						{
+							focusLog("Requesting last focus (2)");
+							after.transferFocusBackward();
+							internalIgnoreFocusChange = false;
+							focusLog("Requesting last focus (done)");
+						}
+					});
 				}
 				else
 				{
-					before.transferFocus();
+					focusLog("Requesting first focus (1)");
+					internalIgnoreFocusChange = true;
+					before.requestFocusInWindow();
+					before.requestFocus();
+					invokeAfterDelay(250, new Runnable()
+					{
+						public void run()
+						{
+							focusLog("Requesting first focus (2)");
+							before.transferFocus();
+							internalIgnoreFocusChange = false;
+							focusLog("Requesting first focus (done)");
+						}
+					});
 				}
 			}
 		};
