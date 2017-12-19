@@ -38,6 +38,10 @@ If not, see <http://www.gnu.org/licenses/>.
   <property name="keystore" location="misc/keystore"/>
   <property name="keystorepass" value="fillthisin"/>
   <property name="keyalias" value="testkey"/>
+
+  <!-- manifest details-->
+  <property name="jarpermissions" location="all-permissions"/>
+  <property name="allowablecode" location="*"/>
   
 <!-- 
 About generating keys
@@ -192,6 +196,10 @@ http://forum.java.sun.com/thread.jspa?threadID=174214
 			<include name="uk/ac/open/tabapplet/**"/>
 			<include name="uk/ac/open/embeddedrecorder/**"/>
     	<exclude name="uk/ac/open/embeddedrecorder/EmbeddedRecorderApp.java"/>
+		<manifest>
+			<attribute name="Permissions" value="{jarpermissions}"/>
+			<attribute name="Caller-Allowable-Codebase" value="{allowablecode}"/>
+		</manifest>
     </jar>
     
     <signjar jar="${build}/jar/embeddedrecorder.unsigned.jar" signedjar="${jartarget2}${DSTAMP}${TSTAMP}.jar" keystore="${keystore}" storepass="${keystorepass}" alias="${keyalias}"/>    
