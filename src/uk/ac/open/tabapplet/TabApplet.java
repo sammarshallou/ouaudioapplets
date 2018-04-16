@@ -30,6 +30,8 @@ public abstract class TabApplet extends JApplet
 
 	private boolean internalIgnoreFocusChange;
 
+	private boolean pauseFlag = false;
+
 	/** Static code detects old Java version */
 	static
 	{
@@ -272,6 +274,23 @@ public abstract class TabApplet extends JApplet
 	{
 		// Tell JavaScript to ditch focus for this applet id
 		String js = "appletDitchFocus('"+focusHackId+"', "+forward+");";
+		if(VERBOSE)
+		{
+			System.err.println("[uk.ac.open.tabapplet.TabApplet] " + focusHackId +
+				": Ditching focus via JS. " + js);
+		}
+		evalJS(js);
+	}
+
+	/**
+	 * To check if VR is paused
+	 * @param ispause boolean 
+	 **/
+	public void isPause(boolean isPause)
+	{
+		this.pauseFlag = isPause;
+		// Tell JavaScript to ditch focus for this applet id
+		String js = "isPause("+this.pauseFlag+");";
 		if(VERBOSE)
 		{
 			System.err.println("[uk.ac.open.tabapplet.TabApplet] " + focusHackId +

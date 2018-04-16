@@ -26,9 +26,11 @@ import java.awt.*;
 import java.awt.geom.*;
 import java.awt.image.BufferedImage;
 
+import javax.swing.JApplet;
 import javax.swing.JComponent;
 
 import uk.ac.open.audio.*;
+import uk.ac.open.tabapplet.TabApplet;
 
 /**
  * Displays fancy graphics to indicate the progress of audio stream download,
@@ -50,6 +52,9 @@ public class PlayerProgress extends JComponent
 	private int playMilliseconds;
 	private byte[][] lastData=new byte[OLDWAVEFORM][]; // Audio data
 	private boolean stereo;
+	private Image pauseImage;
+	private int pauseTime =0;
+	private boolean pauseFlag;
 
 	private Color timeFG,mainFG,darkBG,lightBG,playFG;
 
@@ -180,6 +185,7 @@ public class PlayerProgress extends JComponent
 		{
 			playMilliseconds=0;
 			playPercentage=0.0;
+			this.setPauseFlag(false);
 			if(barOpacity!=0 && downloadPercentage>99.99999 && barFadeThread == null)
 			{
 				barFadeThread = new BarFadeThread();
@@ -189,6 +195,7 @@ public class PlayerProgress extends JComponent
 		{
 			playMilliseconds=0;
 			playPercentage=0.0;
+			this.setPauseFlag(false);
 			if(barOpacity!=0 && barFadeThread == null)
 			{
 				barFadeThread = new BarFadeThread();
@@ -547,20 +554,37 @@ public class PlayerProgress extends JComponent
 			buffer2.setColor(timeFG);
 			buffer2.setFont(TIMEFONT);
 
-			int ms=playMilliseconds;
-			String minutes=ms/60000+"";
-			if(minutes.length()<2) minutes="0"+minutes;
-			ms%=60000;
-			String seconds=ms/1000+"";
-			if(seconds.length()<2) seconds="0"+seconds;
-			ms%=1000;
-			String tenths=ms/100+"";
-			String time=minutes+":"+seconds+"."+tenths;
-			buffer2.drawString(time, TEXTLEFTMARGIN, TEXTTOPMARGIN);
+			int ms;
+			if (this.getpauseFlag() == false)
+			{
+				ms=playMilliseconds;
+				this.setPauseTime(playMilliseconds);
+			} else {
+				ms = this.getPauseTime();
+			}
+				String minutes=ms/60000+"";
+				if(minutes.length()<2) minutes="0"+minutes;
+				ms%=60000;
+				String seconds=ms/1000+"";
+				if(seconds.length()<2) seconds="0"+seconds;
+				ms%=1000;
+				String tenths=ms/100+"";
+				String time=minutes+":"+seconds+"."+tenths;
+				buffer2.drawString(time, TEXTLEFTMARGIN, TEXTTOPMARGIN);
 		}
 
 		buffer.drawImage(fancy2,0,0,null);
 		g2.drawImage(fancy,0,0, null);
+
+		if(barOpacity!=0 || currentState==State.RECORDING)
+		{
+			if (this.pauseImage != null)
+			{
+				int imgsize = 20;
+				g2.drawImage(this.pauseImage,(getWidth()-imgsize)/2,(int)(getHeight()-imgsize)/2, imgsize, imgsize,null);
+				this.setFocusBorder(g2);
+			}
+		}
 
 		// Do bar transparently if we're fading it
 		if(barOpacity!=0)
@@ -602,6 +626,63 @@ public class PlayerProgress extends JComponent
 				}
 			}
 		}
+	}
+
+	/**
+	 * Set border to jpanel on focus
+	 **/
+	private void setFocusBorder(Graphics2D g2) {
+		g2.setColor(new Color(153,204,255));
+		g2.drawRect(2,2,getWidth()-5,getHeight()-5);
+	}
+
+	/**
+	 * Set pause time.
+	 * @param pausetime
+	 **/
+	public void setPauseTime(int pauseTime) {
+		this.pauseTime=pauseTime;
+		playMilliseconds = pauseTime;
+	}
+
+	/**
+	 * Get pausetime
+	 * @return pausetime
+	 **/
+	public int getPauseTime() {
+		return this.pauseTime;
+	}
+
+	/**
+	 * Set Pause Image
+	 * @param pauseimage
+	 **/
+	public void setPauseImage(Image pauseImage) {
+		this.pauseImage = pauseImage;
+	}
+
+	/**
+	 * Set Pause Flag
+	 * @param pauseflag
+	 **/
+	public void setPauseFlag(boolean pauseFlag) {
+		this.pauseFlag = pauseFlag;
+		if (getRootPane() != null)
+		{
+			Container parent = getRootPane().getParent();
+			if (parent instanceof JApplet)
+		    {
+				((TabApplet)parent).isPause(this.pauseFlag);
+		    }
+		}
+	}
+
+	/**
+	 * Get Pause Flag
+	 * @return pauseFlag
+	 **/
+	public boolean getpauseFlag() {
+		return this.pauseFlag;
 	}
 
 	private void paintSweep(Graphics2D g, Color bright, Color dim, double radius,

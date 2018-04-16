@@ -39,10 +39,6 @@ If not, see <http://www.gnu.org/licenses/>.
   <property name="keystorepass" value="fillthisin"/>
   <property name="keyalias" value="testkey"/>
 
-  <!-- manifest details-->
-  <property name="jarpermissions" location="all-permissions"/>
-  <property name="allowablecode" location="*"/>
-  
 <!-- 
 About generating keys
 =====================
@@ -184,8 +180,7 @@ http://forum.java.sun.com/thread.jspa?threadID=174214
 			<include name="uk/ac/open/audiorecorder/**"/>
     	<exclude name="uk/ac/open/audiorecorder/AudioRecorderApp.java"/>
     </jar>
-    
-    <signjar jar="${build}/jar/audiorecording.unsigned.jar" signedjar="${jartarget1}${DSTAMP}${TSTAMP}.jar" keystore="${keystore}" storepass="${keystorepass}" alias="${keyalias}"/>    
+    <signjar jar="${build}/jar/audiorecording.unsigned.jar" signedjar="${jartarget1}${DSTAMP}${TSTAMP}.jar" keystore="${keystore}" storepass="${keystorepass}" alias="${keyalias}"/>
 
     <jar jarfile="${build}/jar/embeddedrecorder.unsigned.jar" basedir="${build}/compiled">
 			<include name="uk/ac/open/audio/*"/>
@@ -197,13 +192,15 @@ http://forum.java.sun.com/thread.jspa?threadID=174214
 			<include name="uk/ac/open/embeddedrecorder/**"/>
     	<exclude name="uk/ac/open/embeddedrecorder/EmbeddedRecorderApp.java"/>
 		<manifest>
-			<attribute name="Permissions" value="{jarpermissions}"/>
-			<attribute name="Caller-Allowable-Codebase" value="{allowablecode}"/>
+			<attribute name="Permissions" value="all-permissions"/>
+ 			<attribute name="Caller-Allowable-Codebase" value="*.open.ac.uk *.open.edu *.vledev3.open.ac.uk/"/>
+ 			<attribute name="Manifest-Version" value="1.0"/>
+ 			<attribute name="Trusted-Library" value="true"/>
+ 			<attribute name="Application-Library-Allowable-Codebase" value="*"/>
 		</manifest>
     </jar>
-    
-    <signjar jar="${build}/jar/embeddedrecorder.unsigned.jar" signedjar="${jartarget2}${DSTAMP}${TSTAMP}.jar" keystore="${keystore}" storepass="${keystorepass}" alias="${keyalias}"/>    
+    <signjar jar="${build}/jar/embeddedrecorder.unsigned.jar" signedjar="${jartarget2}${DSTAMP}${TSTAMP}.jar" keystore="${keystore}" storepass="${keystorepass}" alias="${keyalias}"/>
 
-	</target>   
+	</target>
 	
 </project>

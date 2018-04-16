@@ -1,5 +1,5 @@
 /*
-Copyright 2009 The Open University
+git diff Copyright 2009 The Open University
 http://www.open.ac.uk/lts/projects/audioapplets/
 
 This file is part of the "Open University audio applets" project.
@@ -42,6 +42,7 @@ public class EmbeddedRecorderApp extends JFrame
 				new URL("http://lyceum.open.ac.uk/temp/20s.mp3"),
 				null,//new URL("http://lyceum.open.ac.uk/temp/adpcm.wav"),
 				EmbeddedRecorder.Order.LISTENFIRST,
+				null,
 				null,
 				"Listen","Record","Play back","Model","Stop","Cancel",
 				new Color(0,51,102),new Color(184,219,255),new Color(219,237,255),

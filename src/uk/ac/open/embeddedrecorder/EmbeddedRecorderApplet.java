@@ -20,6 +20,7 @@ If not, see <http://www.gnu.org/licenses/>.
 */
 package uk.ac.open.embeddedrecorder;
 
+import java.applet.AppletContext;
 import java.awt.*;
 import java.io.IOException;
 import java.net.*;
@@ -118,6 +119,22 @@ public class EmbeddedRecorderApplet extends TabApplet
 			throw new IllegalArgumentException("Invalid order: "+orderStr+". " +
 				"Expecting RECORDFIRST or LISTENFIRST.");
 		}
+		String pauseImageUrl = getParameter("pauseimage");
+		Image pauseImage = null;
+		if(pauseImageUrl == null)
+		{
+			throw new IllegalArgumentException("Invalid image: "+pauseImageUrl+". " +
+					"Expecting VALID URL.");
+		} else {
+			AppletContext context = this.getAppletContext();
+			 try {
+				 URL url = new URL(this.getDocumentBase(), pauseImageUrl);
+				 pauseImage = context.getImage(url);
+		      } catch (MalformedURLException e) {
+		         e.printStackTrace();
+			     context.showStatus("Could not load image!");
+		      }
+		}
 
 		try
 		{
@@ -156,6 +173,7 @@ public class EmbeddedRecorderApplet extends TabApplet
 				getOptionalURLParameter("model"),
 				getOptionalURLParameter("user"),
 				order,
+				pauseImage,
 				getParameter("group"),
 				strings[STR_LISTEN], strings[STR_RECORD], strings[STR_PLAYBACK],
 				strings[STR_MODEL], strings[STR_STOP], strings[STR_CANCEL],
