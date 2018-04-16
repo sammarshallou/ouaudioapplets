@@ -68,6 +68,7 @@ public class EmbeddedRecorder extends JPanel
 	 * @param model URL for 'model' answer clip (null if none)
 	 * @param user URL for user's already-recorded audio (null if none)
 	 * @param order Order of activity
+	 * @param image for pause action
 	 * @param group Group name or null if no group
 	 * @param listenStr Listen button text
 	 * @param recordStr Record button text
@@ -86,7 +87,7 @@ public class EmbeddedRecorder extends JPanel
 	 *   audio
 	 */
 	public EmbeddedRecorder(URL upload, URL listen, URL record, URL model,
-			URL user, Order order, String group, String listenStr, String recordStr,
+			URL user, Order order,Image pauseImage, String group, String listenStr, String recordStr,
 			String playBackStr, String modelStr, String stopStr, String cancelStr,
 			Color dark, Color light, Color faint, Color altDark, Color altLight,
 			Color altFaint, Color corners, boolean crossPlatformAudio)
@@ -110,7 +111,7 @@ public class EmbeddedRecorder extends JPanel
 		if(listen!=null)
 		{
 			listenPlayer=new StreamPlayerUI(listenStr,stopStr,cancelStr,
-					dark,light,faint);
+					dark,light,faint,pauseImage);
 			listenPlayer.setForceCrossPlatform(crossPlatformAudio);
 			listenPlayer.initPlay(listen);
 			listenPlayer.setGroup(players);
@@ -122,7 +123,7 @@ public class EmbeddedRecorder extends JPanel
 		}
 
 		userPlayer=new StreamPlayerUI(playBackStr,stopStr,cancelStr,
-				altDark,altLight,altFaint);
+				altDark,altLight,altFaint,pauseImage);
 		userPlayer.setForceCrossPlatform(crossPlatformAudio);
 		userPlayer.setGroup(players);
 		if(user!=null)
@@ -131,7 +132,7 @@ public class EmbeddedRecorder extends JPanel
 		}
 
 		recordPlayer=new StreamPlayerUI(recordStr,stopStr,cancelStr,
-				altDark,altLight,altFaint);
+				altDark,altLight,altFaint,pauseImage);
 		recordPlayer.setForceCrossPlatform(crossPlatformAudio);
 		recordPlayer.initRecord(upload,userPlayer);
 		if(record!=null)
@@ -169,7 +170,7 @@ public class EmbeddedRecorder extends JPanel
 		if(model!=null)
 		{
 			modelPlayer=new StreamPlayerUI(modelStr,stopStr,cancelStr,
-					dark,light,faint);
+					dark,light,faint,pauseImage);
 			modelPlayer.setForceCrossPlatform(crossPlatformAudio);
 			modelPlayer.initPlay(model);
 			modelPlayer.setGroup(players);

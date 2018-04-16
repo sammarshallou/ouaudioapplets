@@ -18,7 +18,7 @@ public abstract class TabApplet extends JApplet
 	protected static boolean oldJava;
 
 	/** If enabled, outputs extra junk to Java console. */
-	private static boolean VERBOSE = false;
+	protected static boolean VERBOSE = false;
 
 	private final static Pattern REGEX_VERSION = Pattern.compile(
 		"([0-9]+)\\.([0-9]+)\\.([0-9]+)(?:_([0-9]+))?(-.*)?");
@@ -280,7 +280,7 @@ public abstract class TabApplet extends JApplet
 		evalJS(js);
 	}
 
-	private void evalJS(String js)
+	protected void evalJS(String js)
 	{
 		try
 		{

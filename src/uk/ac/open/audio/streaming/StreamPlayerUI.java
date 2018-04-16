@@ -85,6 +85,9 @@ public class StreamPlayerUI extends JPanel implements
 	private int lastWait=-1;
 	private boolean doneBeep,reallyStop,enabled;
 	private boolean close;
+	private Image pauseImage;
+	private JPanel inner;
+	private int playMilliseconds;
 
 	private LinkedList<Listener> listeners = new LinkedList<Listener>();
 
@@ -116,9 +119,10 @@ public class StreamPlayerUI extends JPanel implements
 	 * @param dark Dark colour
 	 * @param light Light colour
 	 * @param faint Faint colour
+	 * @param image to show on pause
 	 */
 	public StreamPlayerUI(String startText,String stopText,
-			String cancelUploadText,Color dark,Color light,Color faint)
+			String cancelUploadText,Color dark,Color light,Color faint,Image pauseImage)
 	{
 		super(new BorderLayout(0,MARGIN));
 		setOpaque(false);
@@ -126,17 +130,20 @@ public class StreamPlayerUI extends JPanel implements
 		this.stopText=stopText;
 		this.cancelUploadText=cancelUploadText;
 		this.buttonState=ButtonState.START;
+		this.pauseImage = pauseImage;
 		enabled=true;
 
 		progress=new PlayerProgress(Color.BLACK,dark,light,faint,Color.white);
-		JPanel inner=new JPanel(new BorderLayout());
+		inner=new JPanel(new BorderLayout());
 		inner.setOpaque(false);
 		inner.add(progress,BorderLayout.WEST);
 		add(inner,BorderLayout.NORTH);
+		// Set the initial focus to false.
+		inner.setFocusable(false);
 
 		// Ensure the button doesn't change size between stop/play modes
 		button=new JButton(stopText);
-		button.setOpaque(false);
+		button.setOpaque(true);
 		button.putClientProperty( "JButton.buttonType", "square" );
 		button.putClientProperty( "JComponent.sizeVariant", "small" );
 		if(RecordingDevice.isMac() && System.getProperty("os.version").startsWith("10.4"))
@@ -187,6 +194,50 @@ public class StreamPlayerUI extends JPanel implements
 					break;
 				}
 			}
+		});
+
+		progress.addMouseListener(new MouseAdapter() {
+			public void mouseEntered(MouseEvent event) {
+				progress.setPauseImage(StreamPlayerUI.this.pauseImage);
+			}
+
+			public void mouseExited(MouseEvent event) {
+			   if (progress.getpauseFlag() == true)
+			   {
+				   progress.setPauseImage(StreamPlayerUI.this.pauseImage);
+			   } else {
+				   progress.setPauseImage(null);
+			   }
+			}
+
+			public void mouseClicked(MouseEvent e) {
+				pause();
+			}
+
+		});
+
+		inner.addKeyListener(new KeyAdapter() {
+			public void keyPressed(KeyEvent e) {
+				if (e.getKeyCode() == KeyEvent.VK_ENTER)
+				{
+					pause();
+		        }
+			}
+		});
+
+		inner.addFocusListener(new FocusListener() {
+			public void focusGained(FocusEvent e) {
+					progress.setPauseImage(StreamPlayerUI.this.pauseImage);
+	        }
+
+            public void focusLost(FocusEvent e) {
+              if (progress.getpauseFlag() == true)
+              {
+            	  progress.setPauseImage(StreamPlayerUI.this.pauseImage);
+			  } else {
+				   progress.setPauseImage(null);
+			   }
+            }
 		});
 	}
 
@@ -965,6 +1016,7 @@ public class StreamPlayerUI extends JPanel implements
 		{
 		case STOP:
 			button.setText(stopText);
+			inner.setFocusable(true);
 			for(Listener l : getListeners())
 			{
 				l.started(this);
@@ -973,6 +1025,7 @@ public class StreamPlayerUI extends JPanel implements
 
 		case START:
 			button.setText(startText);
+			inner.setFocusable(false);
 			if (oldState == ButtonState.CANCELUPLOAD)
 			{
 				break;
@@ -989,6 +1042,7 @@ public class StreamPlayerUI extends JPanel implements
 			{
 				l.stopped(this);
 			}
+			inner.setFocusable(true);
 			break;
 		}
 	}
@@ -1029,6 +1083,42 @@ public class StreamPlayerUI extends JPanel implements
 	public boolean hasData()
 	{
 		return playData != null || playURL != null;
+	}
+
+	/**
+	 * Invoked on click of pause function
+	 * **/
+	public void pause() {
+		try	{
+			if (playback != null)
+			{
+				if( playback.isPaused())
+				{
+					playback.resume();
+					progress.setPauseTime(playMilliseconds);
+					progress.setPauseFlag(false);
+				} else {
+					playback.pause();
+					playMilliseconds = progress.getPauseTime();
+					progress.setPauseFlag(true);
+				}
+			}
+			if (recording != null)
+			{
+				if(recording.isPaused())
+				{
+					recording.resume();
+					progress.setPauseTime(playMilliseconds);
+					progress.setPauseFlag(false);
+				} else {
+					recording.pause();
+					playMilliseconds = progress.getPauseTime();
+					progress.setPauseFlag(true);
+				}
+			}
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 }
