@@ -87,7 +87,7 @@ public class EmbeddedRecorder extends JPanel
 	 *   audio
 	 */
 	public EmbeddedRecorder(URL upload, URL listen, URL record, URL model,
-			URL user, Order order,Image pauseImage, String group, String listenStr, String recordStr,
+			URL user, Order order,Image pauseImage, Image playImage, String group, String listenStr, String recordStr,
 			String playBackStr, String modelStr, String stopStr, String cancelStr,
 			Color dark, Color light, Color faint, Color altDark, Color altLight,
 			Color altFaint, Color corners, boolean crossPlatformAudio)
@@ -111,7 +111,7 @@ public class EmbeddedRecorder extends JPanel
 		if(listen!=null)
 		{
 			listenPlayer=new StreamPlayerUI(listenStr,stopStr,cancelStr,
-					dark,light,faint,pauseImage);
+					dark,light,faint,pauseImage,playImage);
 			listenPlayer.setForceCrossPlatform(crossPlatformAudio);
 			listenPlayer.initPlay(listen);
 			listenPlayer.setGroup(players);
@@ -123,7 +123,7 @@ public class EmbeddedRecorder extends JPanel
 		}
 
 		userPlayer=new StreamPlayerUI(playBackStr,stopStr,cancelStr,
-				altDark,altLight,altFaint,pauseImage);
+				altDark,altLight,altFaint,pauseImage,playImage);
 		userPlayer.setForceCrossPlatform(crossPlatformAudio);
 		userPlayer.setGroup(players);
 		if(user!=null)
@@ -132,7 +132,7 @@ public class EmbeddedRecorder extends JPanel
 		}
 
 		recordPlayer=new StreamPlayerUI(recordStr,stopStr,cancelStr,
-				altDark,altLight,altFaint,pauseImage);
+				altDark,altLight,altFaint,pauseImage,playImage);
 		recordPlayer.setForceCrossPlatform(crossPlatformAudio);
 		recordPlayer.initRecord(upload,userPlayer);
 		if(record!=null)
@@ -170,7 +170,7 @@ public class EmbeddedRecorder extends JPanel
 		if(model!=null)
 		{
 			modelPlayer=new StreamPlayerUI(modelStr,stopStr,cancelStr,
-					dark,light,faint,pauseImage);
+					dark,light,faint,pauseImage,playImage);
 			modelPlayer.setForceCrossPlatform(crossPlatformAudio);
 			modelPlayer.initPlay(model);
 			modelPlayer.setGroup(players);

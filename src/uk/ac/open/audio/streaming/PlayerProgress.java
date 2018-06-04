@@ -52,7 +52,7 @@ public class PlayerProgress extends JComponent
 	private int playMilliseconds;
 	private byte[][] lastData=new byte[OLDWAVEFORM][]; // Audio data
 	private boolean stereo;
-	private Image pauseImage;
+	private Image playPauseImage;
 	private int pauseTime =0;
 	private boolean pauseFlag;
 
@@ -580,10 +580,10 @@ public class PlayerProgress extends JComponent
 
 		if(barOpacity!=0 || currentState==State.RECORDING)
 		{
-			if (this.pauseImage != null)
+			if (this.playPauseImage != null)
 			{
 				int imgsize = 20;
-				g2.drawImage(this.pauseImage,(getWidth()-imgsize)/2,(int)(getHeight()-imgsize)/2, imgsize, imgsize,null);
+				g2.drawImage(this.playPauseImage,(getWidth()-imgsize)/2,(int)(getHeight()-imgsize)/2, imgsize, imgsize,null);
 				this.setFocusBorder(g2);
 			}
 		}
@@ -659,8 +659,8 @@ public class PlayerProgress extends JComponent
 	 * Set Pause Image
 	 * @param pauseimage
 	 **/
-	public void setPauseImage(Image pauseImage) {
-		this.pauseImage = pauseImage;
+	public void setPauseImage(Image playPauseImage) {
+		this.playPauseImage = playPauseImage;
 	}
 
 	/**
