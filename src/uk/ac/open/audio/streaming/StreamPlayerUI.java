@@ -86,6 +86,7 @@ public class StreamPlayerUI extends JPanel implements
 	private boolean doneBeep,reallyStop,enabled;
 	private boolean close;
 	private Image pauseImage;
+	private Image playImage;
 	private JPanel inner;
 	private int playMilliseconds;
 
@@ -122,7 +123,7 @@ public class StreamPlayerUI extends JPanel implements
 	 * @param image to show on pause
 	 */
 	public StreamPlayerUI(String startText,String stopText,
-			String cancelUploadText,Color dark,Color light,Color faint,Image pauseImage)
+			String cancelUploadText,Color dark,Color light,Color faint,Image pauseImage, Image playImage)
 	{
 		super(new BorderLayout(0,MARGIN));
 		setOpaque(false);
@@ -131,6 +132,7 @@ public class StreamPlayerUI extends JPanel implements
 		this.cancelUploadText=cancelUploadText;
 		this.buttonState=ButtonState.START;
 		this.pauseImage = pauseImage;
+		this.playImage = playImage;
 		enabled=true;
 
 		progress=new PlayerProgress(Color.BLACK,dark,light,faint,Color.white);
@@ -198,20 +200,16 @@ public class StreamPlayerUI extends JPanel implements
 
 		progress.addMouseListener(new MouseAdapter() {
 			public void mouseEntered(MouseEvent event) {
-				progress.setPauseImage(StreamPlayerUI.this.pauseImage);
+				StreamPlayerUI.this.handlePlayPauseEnteredEvent();
 			}
 
 			public void mouseExited(MouseEvent event) {
-			   if (progress.getpauseFlag() == true)
-			   {
-				   progress.setPauseImage(StreamPlayerUI.this.pauseImage);
-			   } else {
-				   progress.setPauseImage(null);
-			   }
+				StreamPlayerUI.this.handlePlayPauseExitedEvent();
 			}
 
 			public void mouseClicked(MouseEvent e) {
 				pause();
+				StreamPlayerUI.this.handlePlayPauseEnteredEvent();
 			}
 
 		});
@@ -221,26 +219,47 @@ public class StreamPlayerUI extends JPanel implements
 				if (e.getKeyCode() == KeyEvent.VK_ENTER)
 				{
 					pause();
+					StreamPlayerUI.this.handlePlayPauseEnteredEvent();
 		        }
 			}
 		});
 
 		inner.addFocusListener(new FocusListener() {
 			public void focusGained(FocusEvent e) {
-					progress.setPauseImage(StreamPlayerUI.this.pauseImage);
+	            StreamPlayerUI.this.handlePlayPauseEnteredEvent();
 	        }
 
             public void focusLost(FocusEvent e) {
-              if (progress.getpauseFlag() == true)
-              {
-            	  progress.setPauseImage(StreamPlayerUI.this.pauseImage);
-			  } else {
-				   progress.setPauseImage(null);
-			   }
+	            StreamPlayerUI.this.handlePlayPauseExitedEvent();
             }
 		});
 	}
 
+	/**
+	 * function to handle play/pause image
+	 * on focus entered event
+	 */
+	private void handlePlayPauseEnteredEvent() {
+		if (progress.getpauseFlag() == true)
+		{
+			progress.setPauseImage(StreamPlayerUI.this.playImage);
+		} else {
+			progress.setPauseImage(StreamPlayerUI.this.pauseImage);
+		}
+	}
+
+	/**
+	 * function to handle play/pause image
+	 * on focus exited event
+	 */
+	private void handlePlayPauseExitedEvent() {
+		 if (progress.getpauseFlag() == true)
+         {
+			progress.setPauseImage(StreamPlayerUI.this.playImage);
+		 } else {
+			progress.setPauseImage(null);
+		 }
+	}
 	/**
 	 * @param forceCrossPlatform True to use cross-platform audio only
 	 *  (no native)

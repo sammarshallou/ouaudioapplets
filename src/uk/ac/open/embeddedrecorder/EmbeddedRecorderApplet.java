@@ -135,6 +135,22 @@ public class EmbeddedRecorderApplet extends TabApplet
 			     context.showStatus("Could not load image!");
 		      }
 		}
+		String playImageUrl = getParameter("playimage");
+		Image playImage = null;
+		if(playImageUrl == null)
+		{
+			throw new IllegalArgumentException("Invalid image: "+pauseImageUrl+". " +
+					"Expecting VALID URL.");
+		} else {
+			AppletContext context = this.getAppletContext();
+			 try {
+				 URL url = new URL(this.getDocumentBase(), playImageUrl);
+				 playImage = context.getImage(url);
+		      } catch (MalformedURLException e) {
+		         e.printStackTrace();
+			     context.showStatus("Could not load image!");
+		      }
+		}
 
 		try
 		{
@@ -174,6 +190,7 @@ public class EmbeddedRecorderApplet extends TabApplet
 				getOptionalURLParameter("user"),
 				order,
 				pauseImage,
+				playImage,
 				getParameter("group"),
 				strings[STR_LISTEN], strings[STR_RECORD], strings[STR_PLAYBACK],
 				strings[STR_MODEL], strings[STR_STOP], strings[STR_CANCEL],

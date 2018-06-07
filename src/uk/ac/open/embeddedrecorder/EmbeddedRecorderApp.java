@@ -44,6 +44,7 @@ public class EmbeddedRecorderApp extends JFrame
 				EmbeddedRecorder.Order.LISTENFIRST,
 				null,
 				null,
+				null,
 				"Listen","Record","Play back","Model","Stop","Cancel",
 				new Color(0,51,102),new Color(184,219,255),new Color(219,237,255),
 				new Color(204,153,0),new Color(240,225,179),new Color(247,240,217),
