@@ -578,7 +578,7 @@ public class PlayerProgress extends JComponent
 		buffer.drawImage(fancy2,0,0,null);
 		g2.drawImage(fancy,0,0, null);
 
-		if(barOpacity!=0 || currentState==State.RECORDING)
+		if(currentState==State.RECORDING || currentState==State.PLAYING)
 		{
 			if (this.playPauseImage != null)
 			{
