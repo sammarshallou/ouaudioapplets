@@ -199,14 +199,6 @@ public class StreamPlayerUI extends JPanel implements
 		});
 
 		progress.addMouseListener(new MouseAdapter() {
-			public void mouseEntered(MouseEvent event) {
-				StreamPlayerUI.this.handlePlayPauseEnteredEvent();
-			}
-
-			public void mouseExited(MouseEvent event) {
-				StreamPlayerUI.this.handlePlayPauseExitedEvent();
-			}
-
 			public void mouseClicked(MouseEvent e) {
 				pause();
 				StreamPlayerUI.this.handlePlayPauseEnteredEvent();
@@ -257,7 +249,7 @@ public class StreamPlayerUI extends JPanel implements
          {
 			progress.setPauseImage(StreamPlayerUI.this.playImage);
 		 } else {
-			progress.setPauseImage(null);
+			progress.setPauseImage(StreamPlayerUI.this.pauseImage);
 		 }
 	}
 	/**
@@ -414,7 +406,7 @@ public class StreamPlayerUI extends JPanel implements
 			{
 				startRecording();
 			}
-
+			progress.setPauseImage(StreamPlayerUI.this.pauseImage);
 			setButtonState(ButtonState.STOP);
 		}
 		catch(Exception e)
